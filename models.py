@@ -30,7 +30,7 @@ class Constants(BaseConstants):
     p1_B_p2_B_amount = 2
 
     # p2 payoffs
-    p2_A_p1_A_amount = 2
+    p2_A_p1_A_amount = 0
     p2_A_p1_B_amount = 2
     p2_B_p1_A_amount = 2
     p2_B_p1_B_amount = 0
