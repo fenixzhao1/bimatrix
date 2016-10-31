@@ -1,0 +1,46 @@
+{% extends "global/Base.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Results
+{% endblock %}
+
+{% block content %}
+
+    <p>For reference, you were participant {{ player.participant }}</p>
+    <table class="table">
+        <tr>
+            <th>Timestamp</th>
+            <th>Participant</th>
+            <th>Decision</th>
+        </tr>
+        {% for decision in decisions_over_time %}
+        <tr>
+            <td>{{decision.timestamp}}</td>
+            <td>{{decision.participant}}</td>
+            <td>{{decision.decision}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <table class="table" style="width:400px; margin-top:20px; margin-bottom:10px">
+        <tr>
+            <td>As a result, you earned</td>
+            <td>{{ player.payoff }}</td>
+
+        </tr>
+        <tr>
+            <td>In addition, you get a participation fee of</td>
+            <td>{{ Constants.base_points }}</td>
+        </tr>
+        <tr>
+            <td>In total, you receive</td>
+            <td>{{ total_plus_base }}</td>
+        </tr>
+    </table>
+
+    {% next_button %}
+
+    {% include 'prisoner/Instructions.html' %}
+
+{% endblock %}
