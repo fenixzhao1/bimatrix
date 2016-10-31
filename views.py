@@ -87,8 +87,6 @@ class Results(Page):
 
 page_sequence = [
         Introduction,
-        Question,
-        Feedback1,
         DecisionWaitPage,
         Decision,
         Results

@@ -24,15 +24,15 @@ class Constants(BaseConstants):
     num_rounds = 1
 
     # p1 payoffs
-    p1_A_p2_A_amount = 8
+    p1_A_p2_A_amount = 800
     p1_A_p2_B_amount = 0
     p1_B_p2_A_amount = 0
-    p1_B_p2_B_amount = 2
+    p1_B_p2_B_amount = 200
 
     # p2 payoffs
     p2_A_p1_A_amount = 0
-    p2_A_p1_B_amount = 2
-    p2_B_p1_A_amount = 2
+    p2_A_p1_B_amount = 200
+    p2_B_p1_A_amount = 200
     p2_B_p1_B_amount = 0
 
     base_points = 0
@@ -51,8 +51,8 @@ class Constants(BaseConstants):
 
 
 class Subsession(BaseSubsession):
-
-    pass
+    def before_session_starts(self):
+        self.group_randomly()
 
 
 class Group(BaseGroup):
