@@ -1,0 +1,46 @@
+{% extends "global/Base.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Your Choice
+{% endblock %}
+
+{% block styles %}
+
+    <style>
+        .highlight-row-on-hover:hover td {
+            background-color: #fcf8e3;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+    <otree-bimatrix
+        row-labels='["A", "B"]'
+        payoff-matrix=
+        '[
+            [
+                "{{ Constants.p1_A_p2_A_amount }}",
+                "{{ Constants.p2_A_p1_A_amount }}"
+            ],
+            [
+                "{{ Constants.p1_A_p2_B_amount }}",
+                "{{ Constants.p2_A_p1_B_amount }}"
+            ],
+            [
+                "{{ Constants.p1_B_p2_A_amount }}",
+                "{{ Constants.p2_B_p1_A_amount }}"
+            ],
+            [
+                "{{ Constants.p1_B_p2_B_amount }}",
+                "{{ Constants.p2_B_p1_B_amount }}"
+            ]
+        ]'
+        payoff-index='{{ player.id_in_group|add:"-1" }}'>
+    </otree-bimatrix>
+    
+    {% include 'bimatrix/Instructions.html' %}
+
+{% endblock %}
