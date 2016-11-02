@@ -21,7 +21,7 @@ payoffs.
 class Constants(BaseConstants):
     name_in_url = 'bimatrix'
     players_per_group = 2
-    num_rounds = 1
+    num_rounds = 10
 
     # p1 payoffs
     p1_A_p2_A_amount = 800
