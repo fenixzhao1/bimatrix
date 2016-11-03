@@ -7,25 +7,9 @@
 
 {% block content %}
 
-    <p>For reference, you were participant {{ player.participant }}</p>
-    <table class="table">
-        <tr>
-            <th>Timestamp</th>
-            <th>Participant</th>
-            <th>Decision</th>
-        </tr>
-        {% for decision in decisions_over_time %}
-        <tr>
-            <td>{{decision.timestamp}}</td>
-            <td>{{decision.participant}}</td>
-            <td>{{decision.decision}}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
     <table class="table" style="width:400px; margin-top:20px; margin-bottom:10px">
         <tr>
-            <td>As a result, you earned</td>
+            <td>You earned</td>
             <td>{{ player.payoff }}</td>
 
         </tr>

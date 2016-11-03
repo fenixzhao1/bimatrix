@@ -60,12 +60,6 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
 
-    training_question_1 = models.CharField(
-        choices=Constants.training_1_choices,
-        widget=widgets.RadioSelect(),
-        #timeout_default=Constants.training_1_choices[1]
-    )
-
     def is_training_question_1_correct(self):
         return self.training_question_1 == Constants.training_1_correct
 

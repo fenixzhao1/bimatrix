@@ -36,40 +36,17 @@ def vars_for_all_templates(self):
 
 
 class Introduction(Page):
-
     timeout_seconds = 100
-
-
-class Question(Page):
-
-    form_model = models.Player
-    form_fields = ['training_question_1']
-
-    def vars_for_template(self):
-        return {'num_q': 1}
-
-    timeout_seconds = 100
-
-
-class Feedback1(Page):
-
-    template_name = 'bimatrix/Feedback.html'
-
-    def vars_for_template(self):
-        return {'num_q': 1,
-                'question': 'Suppose Alice chose to defect and Bob chose to cooperate. How many points would Alice and Bob receive, respectively?',
-                }
 
 
 class DecisionWaitPage(WaitPage):
-    body_text = 'Waiting for everyone to answer comprehension question'
+    body_text = 'Waiting for all players to be ready'
 
     def after_all_players_arrive(self):
         self.session.vars['end_time'] = timezone.now() + timedelta(seconds=Constants.game_length)
 
 
 class Decision(Page):
-
     timeout_seconds = Constants.game_length
 
 
