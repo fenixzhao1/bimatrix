@@ -38,9 +38,9 @@ class Constants(BaseConstants):
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds
-    period_length = 120
+    period_length = 300
     # Number of discrete time subperiods in a single period.
-    num_subperiods = 10
+    num_subperiods = 30
 
     training_1_choices = [
         'Alice gets 300 points, Bob gets 0 points',

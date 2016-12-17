@@ -3,6 +3,7 @@ from __future__ import division
 from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
+from otree.firebase.events import start_emitter
 from .models import Constants
 
 from django.utils import timezone
@@ -46,8 +47,6 @@ class DecisionWaitPage(WaitPage):
         self.session.vars['start_time'] = timezone.now()
         self.session.vars['end_time'] = (
             timezone.now() + timedelta(seconds=Constants.period_length))
-        # TODO(etherealmachine): We really want to start this when all players
-        # have arrived at the Decision page.
         start_emitter(self, Constants.period_length, Constants.num_subperiods)
 
 

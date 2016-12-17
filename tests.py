@@ -2,6 +2,8 @@
 from __future__ import division
 
 import random
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 from otree.common import Currency as c, currency_range
 
