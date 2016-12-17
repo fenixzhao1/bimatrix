@@ -43,11 +43,16 @@ class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
 
     def after_all_players_arrive(self):
-        self.session.vars['end_time'] = timezone.now() + timedelta(seconds=Constants.game_length)
+        self.session.vars['start_time'] = timezone.now()
+        self.session.vars['end_time'] = (
+            timezone.now() + timedelta(seconds=Constants.period_length))
+        # TODO(etherealmachine): We really want to start this when all players
+        # have arrived at the Decision page.
+        start_emitter(self, Constants.period_length, Constants.num_subperiods)
 
 
 class Decision(Page):
-    timeout_seconds = Constants.game_length
+    timeout_seconds = Constants.period_length
 
 
 class Results(Page):

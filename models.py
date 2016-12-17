@@ -38,7 +38,9 @@ class Constants(BaseConstants):
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds
-    game_length = 120
+    period_length = 120
+    # Number of discrete time subperiods in a single period.
+    num_subperiods = 10
 
     training_1_choices = [
         'Alice gets 300 points, Bob gets 0 points',
@@ -98,14 +100,14 @@ class Player(BasePlayer):
             if my_state != None and other_state != None:
                 if my_state == 0:
                     if other_state == 0:
-                        cur_payoff = A_A_payoff / Constants.game_length
+                        cur_payoff = A_A_payoff / Constants.period_length
                     else:
-                        cur_payoff = A_B_payoff / Constants.game_length
+                        cur_payoff = A_B_payoff / Constants.period_length
                 else:
                     if other_state == 0:
-                        cur_payoff = B_A_payoff / Constants.game_length
+                        cur_payoff = B_A_payoff / Constants.period_length
                     else:
-                        cur_payoff = B_B_payoff / Constants.game_length
+                        cur_payoff = B_B_payoff / Constants.period_length
 
                 if i == len(self.decisions_over_time) - 1:
                     next_change_time = self.session.vars['end_time']
