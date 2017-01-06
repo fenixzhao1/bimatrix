@@ -38,7 +38,7 @@ class Constants(BaseConstants):
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds
-    period_length = 300
+    period_length = 120
     # Number of discrete time subperiods in a single period.
     num_subperiods = 30
 
@@ -110,7 +110,7 @@ class Player(BasePlayer):
                         cur_payoff = B_B_payoff / Constants.period_length
 
                 if i == len(self.decisions_over_time) - 1:
-                    next_change_time = self.session.vars['end_time']
+                    next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
                 else:
                     next_change_time = self.decisions_over_time[i + 1].timestamp
 
