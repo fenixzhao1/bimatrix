@@ -3,7 +3,6 @@ from __future__ import division
 from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
-from otree.firebase.events import start_emitter
 from .models import Constants
 from .models import Decision as DecisionModel
 
