@@ -1,6 +1,8 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html">
 <link rel="import" href="/static/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="/static/bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="/static/bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="/static/bower_components/paper-radio-group/paper-radio-group.html">
 
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-decision/otree-decision.html">
@@ -34,6 +36,23 @@
                 margin-top: 30px;
             }
 
+            #payoff-table {
+                width: 300px;
+                height: 300px;
+                border-collapse: collapse;
+                border: 1px solid black;
+            }
+
+            paper-radio-group {
+                height: 300px;
+            }
+
+            #payoff-table td {
+                border: 1px solid black;
+                text-align: center;
+                vertical-align: center;
+            }
+
             styled-range {
                 transform: rotate(270deg) translateX(-100%);
                 transform-origin: 0 0px;
@@ -64,6 +83,14 @@
             paper-progress {
                 margin-bottom: 10px;
                 --paper-progress-height: 30px;
+            }
+
+            .light-blue {
+                background-color: #b5d9ff;
+            }
+
+            .blue {
+                background-color: #39f;
             }
 
         </style>
@@ -103,7 +130,34 @@
                     
                     <div id="heatmap-column" class="layout horizontal">
                         <template is="dom-if" if="[[ pureStrategy ]]">
-                            <p>TODO</p>
+                            <paper-radio-group
+                                class="layout vertical around-justified self-center"
+                                selected="{{ _myPlannedDecisionString }}">
+                                <paper-radio-button name="1"></paper-radio-button>
+                                <paper-radio-button name="0"></paper-radio-button>
+                            </paper-radio-group>
+                            <table id="payoff-table" class="self-center">
+                                <tr>
+                                    <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 1, 1) ]]">
+                                        <span>[[ _array(myPayoffs, 0) ]]</span>,
+                                        <span>[[ _array(otherPayoffs, 0) ]]</span>
+                                    </td>
+                                    <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 1, 0) ]]">
+                                        <span>[[ _array(myPayoffs, 1) ]]</span>,
+                                        <span>[[ _array(otherPayoffs, 1) ]]</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 0, 1) ]]">
+                                        <span>[[ _array(myPayoffs, 2) ]]</span>,
+                                        <span>[[ _array(otherPayoffs, 2) ]]</span>
+                                    </td>
+                                    <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 0, 0) ]]">
+                                        <span>[[ _array(myPayoffs, 3) ]]</span>,
+                                        <span>[[ _array(otherPayoffs, 3) ]]</span>
+                                    </td>
+                                </tr>
+                            </div>
                         </template>
                         <template is="dom-if" if="[[ !pureStrategy ]]">
                             <div class="layout vertical start">
@@ -219,6 +273,10 @@
                 _subperiodProgress: {
                     type: Number,
                     value: 0,
+                },
+                _myPlannedDecisionString: {
+                    type: String,
+                    observer: '_syncMyPlannedDecision',
                 }
             },
             ready() {
@@ -256,11 +314,28 @@
                     const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
                     return flowPayoff;
                 };
+
+                this._myPlannedDecisionString = new String(this.initialDecision);
+            },
+            _array(a, i) {
+                return a[i];
+            },
+            _payoffMatrixClass(myDecision, otherDecision, i, j) {
+                if (myDecision === i && otherDecision === j) {
+                    return 'blue';
+                } else if (myDecision === i || otherDecision === j) {
+                    return 'light-blue';
+                }
+                return '';
+            },
+            _syncMyPlannedDecision() {
+                this.myPlannedDecision = parseInt(this._myPlannedDecisionString);
             },
             _onPeriodStart() {
                 this._subperiodProgress = 0;
                 this.lastT = performance.now();
-                this._animID = window.requestAnimationFrame(this._updateSubperiodProgress.bind(this));
+                this._animID = window.requestAnimationFrame(
+                    this._updateSubperiodProgress.bind(this));
             },
             _onPeriodEnd() {
                 window.cancelAnimationFrame(this._animID);
@@ -273,7 +348,8 @@
                 const deltaT = (t - this.lastT);
                 const secondsPerSubperiod = this.periodLength / this.numSubperiods;
                 this._subperiodProgress = 100 * ((deltaT / 1000) / secondsPerSubperiod);
-                this._animID = window.requestAnimationFrame(this._updateSubperiodProgress.bind(this));
+                this._animID = window.requestAnimationFrame(
+                    this._updateSubperiodProgress.bind(this));
             },
         })
     </script>
