@@ -107,7 +107,8 @@
             my-decision="{{ myPlannedDecision }}"
             my-current-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}"
-            max-per-second="10">
+            max-per-second="10"
+            on-group-decisions-changed="_onGroupDecisionsChanged">
         </otree-decision>
 
         <otree-decision-bot
@@ -255,7 +256,6 @@
                 },
                 otherDecision: {
                     type: Number,
-                    observer: '_onOtherDecisionChanged',
                 },
                 periodLength: Number,
                 numSubperiods: {
@@ -340,7 +340,7 @@
             _onPeriodEnd() {
                 window.cancelAnimationFrame(this._animID);
             },
-            _onOtherDecisionChanged() {
+            _onGroupDecisionsChanged() {
                 this.lastT = performance.now();
                 this._subperiodProgress = 0;
             },
