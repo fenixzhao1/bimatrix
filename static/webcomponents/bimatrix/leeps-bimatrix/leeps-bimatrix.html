@@ -5,9 +5,9 @@
 <link rel="import" href="/static/bower_components/paper-radio-group/paper-radio-group.html">
 
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-decision/otree-decision.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-decision-bot/otree-decision-bot.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/redwood-decision/redwood-decision.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/redwood-decision-bot/redwood-decision-bot.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/redwood-period/redwood-period.html">
 
 <link rel="import" href="/static/webcomponents/bimatrix/bimatrix-heatmap/bimatrix-heatmap.html">
 <link rel="import" href="/static/webcomponents/bimatrix/heatmap-thermometer/heatmap-thermometer.html">
@@ -96,26 +96,26 @@
         </style>
 
         <otree-constants id="constants"></otree-constants>
-        <otree-period
+        <redwood-period
             running="{{ _isPeriodRunning }}"
             on-period-start="_onPeriodStart"
             on-period-end="_onPeriodEnd">
-        </otree-period>
+        </redwood-period>
 
-        <otree-decision
+        <redwood-decision
             initial-decision="[[ initialDecision ]]"
             my-decision="{{ myPlannedDecision }}"
             my-current-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}"
             max-per-second="10"
             on-group-decisions-changed="_onGroupDecisionsChanged">
-        </otree-decision>
+        </redwood-decision>
 
-        <otree-decision-bot
+        <redwood-decision-bot
             id="bot"
             my-decision="{{ myPlannedDecision }}"
             other-decision="{{ otherDecision }}">
-        </otree-decision-bot>
+        </redwood-decision-bot>
 
         <div class="layout vertical center">
 
@@ -266,7 +266,7 @@
                     type: Boolean,
                     value: false
                 },
-                // set by otree-period
+                // set by redwood-period
                 _isPeriodRunning: {
                     type: Boolean
                 },
