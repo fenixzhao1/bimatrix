@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
+import random
 
 from django.contrib.contenttypes.models import ContentType
 from otree.constants import BaseConstants
@@ -72,7 +71,7 @@ class Group(DecisionGroup):
         if roundno in [1, 2, 3]:
             return None
         elif roundno in [4, 5, 6]:
-            return 10
+            return 110
         elif roundno in [7, 8, 9]:
             return None
         elif roundno in [10, 11, 12]:
@@ -87,7 +86,9 @@ class Group(DecisionGroup):
 class Player(BasePlayer):
 
     def initial_decision(self):
-        return 0.5
+        if self.subsession.pure_strategy():
+            return random.choice([0, 1])
+        return random.random()
 
     def other_player(self):
         return self.get_others_in_group()[0]
