@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
 from ._builtin import Page, WaitPage
-from .models import Constants, Player
 
 from datetime import timedelta
 

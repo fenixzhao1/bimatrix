@@ -1,3 +1,4 @@
+import csv
 import random
 
 from django.contrib.contenttypes.models import ContentType
@@ -14,73 +15,47 @@ This is a configurable bimatrix game.
 class Constants(BaseConstants):
     name_in_url = 'bimatrix'
     players_per_group = 2
-    num_rounds = 12
-
-    payoff_matrices = [
-        [
-            [800, 0], [0, 200],
-            [0, 200], [200, 0],
-        ],
-        [
-            [500, 100], [0, 200],
-            [0, 200], [300, 0],
-        ],
-        [
-            [300, 300], [0, 800],
-            [800, 0], [100, 100],
-        ],
-        [
-            [300, 400], [100, 0],
-            [0, 100], [400, 300],
-        ]
-    ]
-
+    num_rounds = 6
     base_points = 0
 
-    # Amount of time the game stays on the decision page in seconds.
-    period_length = 120
+
+def parse_config(config_file):
+    with open('bimatrix/configs/' + config_file) as f:
+        rows = list(csv.DictReader(f))
+
+    rounds = []
+    for row in rows:
+        rounds.append({
+            'period_length': int(row['period_length']),
+            'num_subperiods': int(row['num_subperiods']),
+            'pure_strategy': True if row['pure_strategy'] == 'TRUE' else False,
+            'payoff_matrix': [
+                [int(row['payoff1Aa']), int(row['payoff2Aa'])], [int(row['payoff1Ab']), int(row['payoff2Ab'])],
+                [int(row['payoff1Ba']), int(row['payoff2Ba'])], [int(row['payoff1Bb']), int(row['payoff2Bb'])]
+            ],
+        })
+    return rounds
 
 
 class Subsession(BaseSubsession):
+
     def before_session_starts(self):
         self.group_randomly()
 
     def payoff_matrix(self):
-        roundno = self.round_number
-
-        if roundno in [1, 2, 3]:
-            return Constants.payoff_matrices[2]
-        elif roundno in [4, 5, 6]:
-            return Constants.payoff_matrices[3]
-        elif roundno in [7, 8, 9]:
-            return Constants.payoff_matrices[0]
-        elif roundno in [10, 11, 12]:
-            return Constants.payoff_matrices[1]
-        else:
-            print("invalid round number!")
+        return parse_config(self.session.config['config_file'])[self.round_number-1]['payoff_matrix']
 
     def pure_strategy(self):
-        return self.round_number % 2 == 0
+        return parse_config(self.session.config['config_file'])[self.round_number-1]['pure_strategy']
 
 
 class Group(DecisionGroup):
 
     def num_subperiods(self):
-        roundno = self.round_number
-
-        if roundno in [1, 2, 3]:
-            return None
-        elif roundno in [4, 5, 6]:
-            return 110
-        elif roundno in [7, 8, 9]:
-            return None
-        elif roundno in [10, 11, 12]:
-            return 10
-        else:
-            print("invalid round number!")
+        return parse_config(self.session.config['config_file'])[self.round_number-1]['num_subperiods']
 
     def period_length(self):
-        return Constants.period_length
+        return parse_config(self.session.config['config_file'])[self.round_number-1]['period_length']
 
 
 class Player(BasePlayer):
