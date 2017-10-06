@@ -15,7 +15,7 @@ This is a configurable bimatrix game.
 class Constants(BaseConstants):
     name_in_url = 'bimatrix'
     players_per_group = 2
-    num_rounds = 100
+    num_rounds = 32
     base_points = 0
 
 
