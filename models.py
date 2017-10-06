@@ -15,7 +15,7 @@ This is a configurable bimatrix game.
 class Constants(BaseConstants):
     name_in_url = 'bimatrix'
     players_per_group = 2
-    num_rounds = 6
+    num_rounds = 100
     base_points = 0
 
 
@@ -50,6 +50,9 @@ class Subsession(BaseSubsession):
 
 
 class Group(DecisionGroup):
+
+    def num_rounds(self):
+        return len(parse_config(self.session.config['config_file']))
 
     def num_subperiods(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['num_subperiods']
