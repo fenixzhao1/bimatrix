@@ -1,9 +1,9 @@
 round,period_length,num_subperiods,pure_strategy,payoff1Aa,payoff1Ab,payoff1Ba,payoff1Bb,payoff2Aa,payoff2Ab,payoff2Ba,payoff2Bb
-1,90,1,TRUE,8,0,0,2,0,2,2,0
+1,90,2,TRUE,8,0,0,2,0,2,2,0
 2,90,6,TRUE,8,0,0,2,0,2,2,0
 3,90,6,TRUE,3,1,1,7,1,3,2,1
 4,90,15,TRUE,3,1,1,7,1,3,2,1
-5,90,1,FALSE,3,1,1,7,1,3,2,1
+5,90,2,FALSE,3,1,1,7,1,3,2,1
 6,90,6,FALSE,3,1,1,7,1,3,2,1
 7,90,15,FALSE,8,0,0,2,0,2,2,0
 8,90,0,FALSE,8,0,0,2,0,2,2,0
@@ -26,8 +26,8 @@ round,period_length,num_subperiods,pure_strategy,payoff1Aa,payoff1Ab,payoff1Ba,p
 25,90,0,FALSE,8,0,0,2,0,2,2,0
 26,90,15,FALSE,8,0,0,2,0,2,2,0
 27,90,6,FALSE,3,1,1,7,1,3,2,1
-28,90,1,FALSE,3,1,1,7,1,3,2,1
+28,90,2,FALSE,3,1,1,7,1,3,2,1
 29,90,15,TRUE,3,1,1,7,1,3,2,1
 30,90,6,TRUE,3,1,1,7,1,3,2,1
 31,90,6,TRUE,8,0,0,2,0,2,2,0
-32,90,1,TRUE,8,0,0,2,0,2,2,0
+32,90,2,TRUE,8,0,0,2,0,2,2,0
