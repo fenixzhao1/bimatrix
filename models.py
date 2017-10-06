@@ -28,6 +28,7 @@ def parse_config(config_file):
     rounds = []
     for row in rows:
         rounds.append({
+            'shuffle_population': True if row['shuffle_population'] == 'TRUE' else False,
             'period_length': int(row['period_length']),
             'num_subperiods': int(row['num_subperiods']),
             'pure_strategy': True if row['pure_strategy'] == 'TRUE' else False,
@@ -42,7 +43,13 @@ def parse_config(config_file):
 class Subsession(BaseSubsession):
 
     def before_session_starts(self):
-        self.group_randomly()
+        config = parse_config(self.session.config['config_file'])
+        if self.round_number > len(config):
+            self.group_randomly()
+        elif config[self.round_number-1]['shuffle_population']:
+            self.group_randomly()
+        else:
+            self.group_randomly(fixed_id_in_group=True)
 
     def payoff_matrix(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['payoff_matrix']
