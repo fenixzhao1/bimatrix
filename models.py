@@ -28,7 +28,7 @@ def parse_config(config_file):
     rounds = []
     for row in rows:
         rounds.append({
-            'shuffle_population': True if row['shuffle_population'] == 'TRUE' else False,
+            'shuffle_role': True if row['shuffle_role'] == 'TRUE' else False,
             'period_length': int(row['period_length']),
             'num_subperiods': int(row['num_subperiods']),
             'pure_strategy': True if row['pure_strategy'] == 'TRUE' else False,
@@ -46,7 +46,7 @@ class Subsession(BaseSubsession):
         config = parse_config(self.session.config['config_file'])
         if self.round_number > len(config):
             self.group_randomly()
-        elif config[self.round_number-1]['shuffle_population']:
+        elif config[self.round_number-1]['shuffle_role']:
             self.group_randomly()
         else:
             self.group_randomly(fixed_id_in_group=True)
