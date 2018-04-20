@@ -209,7 +209,8 @@
                                             step="0.01"
                                             disabled="[[ !_isPeriodRunning ]]"
                                             value="{{ myPlannedDecision }}"
-                                            rate-limit="[[ rateLimit ]]">
+                                            rate-limit="[[ rateLimit ]]"
+                                            initial-value="[[ initialDecision ]]">
                                         </styled-range>
                                     </div>
                                     <bimatrix-heatmap
@@ -388,13 +389,14 @@
                     return flowPayoff;
                 };
 
-                // if using pure strategy, set bot to only choose pure strategies
                 if (this.pureStrategy) {
+                    // if using pure strategy, set bot to only choose pure strategies
                     this.$.bot.lambda = 1;
                     this.$.bot.pattern = true;
-                }
 
-                this._myPlannedDecisionString = new String(this.initialDecision);
+                    // only set decision string if we're not doing continuous strategy
+                    this._myPlannedDecisionString = new String(this.initialDecision);
+                }
             },
             _array(a, i) {
                 return a[i];
