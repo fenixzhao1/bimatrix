@@ -139,6 +139,8 @@
 						y: 15,
 					},
 				});
+				
+				this._updateDataset();
 			},
 			_handlePeriodStart() {
 				this.start_time = performance.now();
@@ -167,8 +169,9 @@
 			},
 			// is called everytime someone's decision changes to update the graph
 			_updateDataset() {
+				console.log('otherDecision: ', this.otherDecision);
 				// if graph hasn't been initialized, don't do anything
-				if (!this.graph_obj) return;
+				if (!this.graph_obj) { console.log('not initialized'); return; }
 
 				// calculate new decision's timestamp as a value between 0 and 1
 				const xval = (
