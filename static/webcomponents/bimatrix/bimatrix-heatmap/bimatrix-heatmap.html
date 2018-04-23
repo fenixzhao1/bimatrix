@@ -149,11 +149,11 @@
 				showBestResponse: Boolean,
 				_atWorst: {
 					type: Number,
-					computed: '_computeAtWorst(myDecision)',
+					computed: '_computeAtWorst(myDecision, payoffs)',
 				},
 				_bestResponse: {
 					type: Number,
-					computed: '_computeBestResponse(otherDecision)',
+					computed: '_computeBestResponse(otherDecision, payoffs)',
 				}
 			},
 			// format a decision as a CSS percent value
@@ -213,15 +213,15 @@
 
 				ctx.putImageData(imageData, 0, 0);
 			},
-			_computeAtWorst(myDecision) {
-				const left = myDecision * this.get(['payoffs', 0]) + (1 - myDecision) * this.get(['payoffs', 2]);
-				const right = myDecision * this.get(['payoffs', 1]) + (1 - myDecision) * this.get(['payoffs', 3]);
+			_computeAtWorst(myDecision, payoffs) {
+				const left = myDecision * payoffs[0] + (1 - myDecision) * payoffs[2];
+				const right = myDecision * payoffs[1] + (1 - myDecision) * payoffs[3];
 				const worst = Math.round(Math.min(left, right));
 				return isNaN(worst) ? '' : worst;
 			},
-			_computeBestResponse(otherDecision) {
-				const top = otherDecision * this.get(['payoffs', 0]) + (1 - otherDecision) * this.get(['payoffs', 1]);
-				const bottom = otherDecision * this.get(['payoffs', 2]) + (1 - otherDecision) * this.get(['payoffs', 3]);
+			_computeBestResponse(otherDecision, payoffs) {
+				const top = otherDecision * payoffs[0] + (1 - otherDecision) * payoffs[1];
+				const bottom = otherDecision * payoffs[2] + (1 - otherDecision) * payoffs[3];
 				const best = Math.round(Math.max(top, bottom));
 				return isNaN(best) ? '' : best;
 			},
