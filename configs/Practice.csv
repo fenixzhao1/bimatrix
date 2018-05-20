@@ -1,5 +1,0 @@
-﻿round,shuffle_role,period_length,num_subperiods,pure_strategy,show_at_worst,show_best_response,rate_limit,payoff1Aa,payoff1Ab,payoff1Ba,payoff1Bb,payoff2Aa,payoff2Ab,payoff2Ba,payoff2Bb
-1,TRUE,90,15,TRUE,FALSE,FALSE,2,8,0,0,2,0,2,2,0
-2,FALSE,90,15,FALSE,TRUE,TRUE,2,8,0,0,2,0,2,2,0
-3,FALSE,90,0,TRUE,FALSE,FALSE,2,8,0,0,2,0,2,2,0
-4,FALSE,90,0,FALSE,TRUE,TRUE,2,8,0,0,2,0,2,2,0
