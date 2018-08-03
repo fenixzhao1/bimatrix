@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from otree.constants import BaseConstants
 from otree.models import BasePlayer, BaseSubsession
 
-from otree_redwood.models import Event, DecisionGroup
+from otree_redwood.models import Event, DecisionGroup, SubsessionSilosMixin
 
 doc = """
 This is a configurable bimatrix game.
@@ -43,7 +43,7 @@ def parse_config(config_file):
     return rounds
 
 
-class Subsession(BaseSubsession):
+class Subsession(BaseSubsession, SubsessionSilosMixin):
 
     def get_average_strategy(self, row_player):
         id_in_group = 1 if row_player else 2
@@ -66,11 +66,12 @@ class Subsession(BaseSubsession):
     def before_session_starts(self):
         config = parse_config(self.session.config['config_file'])
         if self.round_number > len(config):
-            self.group_randomly()
-        elif config[self.round_number-1]['shuffle_role']:
-            self.group_randomly()
-        else:
-            self.group_randomly(fixed_id_in_group=True)
+            return
+
+        fixed_id_in_group = config[self.round_number-1]['shuffle_role']
+        groups_per_silo = self.session.config['groups_per_silo']
+        # use otree-redwood's SubsessionSilosMixin to organize the session into silos
+        self.group_randomly_in_silos(groups_per_silo, fixed_id_in_group)
 
     def payoff_matrix(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['payoff_matrix']
