@@ -110,10 +110,10 @@ def get_output_table(events):
                 if e.channel == 'group_decisions':
                     cur_decision_event = e
                 elif e.channel == 'target':
-                    if e.value['pcode'] == p1_code:
-                        p1_target = e.value['target']
+                    if e.participant.code == p1_code:
+                        p1_target = e.value
                     else:
-                        p2_target = e.value['target']
+                        p2_target = e.value
             if cur_decision_event:
                 p1_decision = cur_decision_event.value[p1_code]
                 p2_decision = cur_decision_event.value[p2_code]
@@ -136,10 +136,10 @@ def get_output_table(events):
         p2_target = float('nan')
         for event in events:
             if event.channel == 'target':
-                if event.value['pcode'] == p1_code:
-                    p1_target = event.value['target']
+                if event.participant.code == p1_code:
+                    p1_target = event.value
                 else:
-                    p2_target = event.value['target']
+                    p2_target = event.value
             elif event.channel == 'group_decisions':
                 rows.append([
                     group.session.code,
