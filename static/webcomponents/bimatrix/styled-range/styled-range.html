@@ -1,5 +1,7 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html">
 
+<link rel="import" href="/static/otree-redwood/webcomponents/redwood-channel/redwood-channel.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 
 <dom-module id="styled-range">
 
@@ -14,6 +16,9 @@
 				height: 100%;
 			}
 		</style>
+
+        <otree-constants id="constants"></otree-constants>
+        <redwood-channel id="channel" channel="target"></redwood-channel>
 
 		<input
             id="input"
@@ -72,6 +77,7 @@
 					window.clearTimeout(this._timeoutID);
 					this._lastMovedTime = performance.now();
 					this._timeoutID = window.setTimeout(this._tick.bind(this), 200);
+					this.$.channel.send({ target: this._sliderValue, pcode: this.$.constants.participantCode });
 				}
 				else {
 					this.value = this._sliderValue;

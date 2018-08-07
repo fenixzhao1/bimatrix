@@ -64,6 +64,8 @@ def get_output_table_header():
         'tick',
         'p1_strategy',
         'p2_strategy',
+        'p1_target',
+        'p2_target',
         'p1_code',
         'p2_code',
         'payoff1Aa',
@@ -98,6 +100,8 @@ def get_output_table(events):
     if group.num_subperiods() == 0:
         p1_decision = float('nan')
         p2_decision = float('nan')
+        p1_target = float('nan')
+        p2_target = float('nan')
         for tick in range((maxT - minT).seconds * ticks_per_second):
             currT = minT + timedelta(seconds=(tick / ticks_per_second))
             cur_decision_event = None
@@ -105,6 +109,11 @@ def get_output_table(events):
                 e = events.pop(0)
                 if e.channel == 'group_decisions':
                     cur_decision_event = e
+                elif e.channel == 'target':
+                    if e.value['pcode'] == p1_code:
+                        p1_target = e.value['target']
+                    else:
+                        p2_target = e.value['target']
             if cur_decision_event:
                 p1_decision = cur_decision_event.value[p1_code]
                 p2_decision = cur_decision_event.value[p2_code]
@@ -116,13 +125,22 @@ def get_output_table(events):
                 tick,
                 p1_decision,
                 p2_decision,
+                p1_target,
+                p2_target,
                 p1_code,
                 p2_code,
             ] + config_columns)
     else:
         tick = 0
+        p1_target = float('nan')
+        p2_target = float('nan')
         for event in events:
-            if event.channel == 'group_decisions':
+            if event.channel == 'target':
+                if event.value['pcode'] == p1_code:
+                    p1_target = event.value['target']
+                else:
+                    p2_target = event.value['target']
+            elif event.channel == 'group_decisions':
                 rows.append([
                     group.session.code,
                     group.subsession_id,
@@ -131,6 +149,8 @@ def get_output_table(events):
                     tick,
                     event.value[p1_code],
                     event.value[p2_code],
+                    p1_target,
+                    p2_target,
                     p1_code,
                     p2_code,
                 ] + config_columns)
