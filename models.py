@@ -5,7 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 from otree.constants import BaseConstants
 from otree.models import BasePlayer, BaseSubsession
 
-from otree_redwood.models import Event, DecisionGroup, SubsessionSilosMixin
+from otree_redwood.models import Event, DecisionGroup
+from otree_redwood.mixins import SubsessionSilosMixin, GroupSilosMixin
 
 doc = """
 This is a configurable bimatrix game.
@@ -35,6 +36,7 @@ def parse_config(config_file):
             'show_at_worst': True if row['show_at_worst'] == 'TRUE' else False,
             'show_best_response': True if row['show_best_response'] == 'TRUE' else False,
             'rate_limit': int(row['rate_limit']) if row['rate_limit'] else 0,
+            'mean_matching': True if row['mean_matching'] == 'TRUE' else False,
             'payoff_matrix': [
                 [int(row['payoff1Aa']), int(row['payoff2Aa'])], [int(row['payoff1Ab']), int(row['payoff2Ab'])],
                 [int(row['payoff1Ba']), int(row['payoff2Ba'])], [int(row['payoff1Bb']), int(row['payoff2Bb'])]
@@ -89,7 +91,7 @@ class Subsession(BaseSubsession, SubsessionSilosMixin):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['rate_limit']
 
 
-class Group(DecisionGroup):
+class Group(DecisionGroup, GroupSilosMixin):
 
     def num_rounds(self):
         return len(parse_config(self.session.config['config_file']))
@@ -99,6 +101,9 @@ class Group(DecisionGroup):
 
     def period_length(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['period_length']
+    
+    def mean_matching(self):
+        return parse_config(self.session.config['config_file'])[self.round_number-1]['mean_matching']
 
 
 class Player(BasePlayer):

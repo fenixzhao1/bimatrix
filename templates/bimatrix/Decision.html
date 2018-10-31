@@ -37,6 +37,9 @@
         payoff-matrix='{{ player.subsession.payoff_matrix }}'
         period-length='{{ player.group.period_length }}'
         rate-limit='{{ player.subsession.rate_limit }}'
+        {% if player.group.mean_matching %}
+        mean-matching
+        {% endif %}
         {% if player.group.num_subperiods %}
         num-subperiods='{{ player.group.num_subperiods }}'
         {% endif %}

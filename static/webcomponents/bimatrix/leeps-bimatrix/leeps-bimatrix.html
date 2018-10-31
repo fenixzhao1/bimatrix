@@ -16,6 +16,7 @@
 <link rel="import" href="/static/webcomponents/bimatrix/strategy-graph/strategy-graph.html">
 <link rel="import" href="/static/webcomponents/bimatrix/subperiod-strategy-graph/subperiod-strategy-graph.html">
 <link rel="import" href="/static/webcomponents/bimatrix/styled-range/styled-range.html">
+<link rel="import" href="/static/webcomponents/bimatrix/discrete-mean-matching-heatmap/discrete-mean-matching-heatmap.html">
 
 
 <dom-module id="leeps-bimatrix">
@@ -123,7 +124,8 @@
             my-current-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}"
             max-per-second="10"
-            on-group-decisions-changed="_onGroupDecisionsChanged">
+            on-group-decisions-changed="_onGroupDecisionsChanged"
+            mean-matching="[[ meanMatching ]]">
         </redwood-decision>
 
         <redwood-decision-bot
@@ -152,44 +154,57 @@
                                 <paper-radio-button name="1"></paper-radio-button>
                                 <paper-radio-button name="0"></paper-radio-button>
                             </paper-radio-group>
-                            <table id="payoff-table" class="self-center">
-                                <tr>
-                                    <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 1, 1) ]]">
-                                        <span class="your-payoff">
-                                            [[ _array(myPayoffs, 0) ]]
-                                        </span>,
-                                        <span class="other-payoff">
-                                            [[ _array(otherPayoffs, 0) ]]
-                                        </span>
-                                    </td>
-                                    <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 1, 0) ]]">
-                                        <span class="your-payoff">
-                                            [[ _array(myPayoffs, 1) ]]
-                                        </span>,
-                                        <span class="other-payoff">
-                                            [[ _array(otherPayoffs, 1) ]]
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 0, 1) ]]">
-                                        <span class="your-payoff">
-                                            [[ _array(myPayoffs, 2) ]]
-                                        </span>,
-                                        <span class="other-payoff">
-                                            [[ _array(otherPayoffs, 2) ]]
-                                        </span>
-                                    </td>
-                                    <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 0, 0) ]]">
-                                        <span class="your-payoff">
-                                            [[ _array(myPayoffs, 3) ]]
-                                        </span>,
-                                        <span class="other-payoff">
-                                            [[ _array(otherPayoffs, 3) ]]
-                                        </span>
-                                    </td>
-                                </tr>
-                            </div>
+
+                            <template is="dom-if" if="[[ meanMatching ]]">
+                                <discrete-mean-matching-heatmap
+                                    class="self-center"
+                                    my-decision="[[ myDecision ]]"
+                                    other-decision="[[ otherDecision ]]"
+                                    size="300"
+                                    payoffs="[[ myPayoffs ]]"
+                                    color="[[ myColor ]]">
+                                </discrete-mean-matching-heatmap>
+                            </template>
+                            <template is="dom-if" if="[[ !meanMatching ]]">
+                                <table id="payoff-table" class="self-center">
+                                    <tr>
+                                        <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 1, 1) ]]">
+                                            <span class="your-payoff">
+                                                [[ _array(myPayoffs, 0) ]]
+                                            </span>,
+                                            <span class="other-payoff">
+                                                [[ _array(otherPayoffs, 0) ]]
+                                            </span>
+                                        </td>
+                                        <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 1, 0) ]]">
+                                            <span class="your-payoff">
+                                                [[ _array(myPayoffs, 1) ]]
+                                            </span>,
+                                            <span class="other-payoff">
+                                                [[ _array(otherPayoffs, 1) ]]
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 0, 1) ]]">
+                                            <span class="your-payoff">
+                                                [[ _array(myPayoffs, 2) ]]
+                                            </span>,
+                                            <span class="other-payoff">
+                                                [[ _array(otherPayoffs, 2) ]]
+                                            </span>
+                                        </td>
+                                        <td class$="[[ _payoffMatrixClass(myPlannedDecision, otherDecision, 0, 0) ]]">
+                                            <span class="your-payoff">
+                                                [[ _array(myPayoffs, 3) ]]
+                                            </span>,
+                                            <span class="other-payoff">
+                                                [[ _array(otherPayoffs, 3) ]]
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </template>
                         </template>
                         <template is="dom-if" if="[[ !pureStrategy ]]">
                             <div class="layout vertical start">
@@ -256,6 +271,8 @@
                                 </template>
                                 <template is="dom-if" if="[[ numSubperiods ]]">
                                     <subperiod-strategy-graph
+                                        my-decision="[[ myDecision ]]"
+                                        other-decision="[[ otherDecision ]]"
                                         period-length="[[ periodLength ]]"
                                         num-subperiods="[[ numSubperiods ]]"
                                     ></subperiod-strategy-graph>
@@ -277,7 +294,7 @@
 
     </template>
     
-    <script src="/static/general/color.js"></script>
+    <script src="../color.js"></script>
 
     <script>
         Polymer({
@@ -315,6 +332,10 @@
                 },
                 rateLimit: {
                     type: Number,
+                },
+                meanMatching: {
+                    type: Boolean,
+                    value: false,
                 },
                 myChoiceSeries: {
                     type: Array,
