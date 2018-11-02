@@ -53,6 +53,7 @@ def get_config_columns(group):
         config['show_at_worst'],
         config['show_best_response'],
         config['rate_limit'],
+        config['mean_matching'],
     ]
 
 def get_output_table_header():
@@ -66,6 +67,8 @@ def get_output_table_header():
         'p2_strategy',
         'p1_target',
         'p2_target',
+        'p1_avg',
+        'p2_avg',
         'p1_code',
         'p2_code',
         'payoff1Aa',
@@ -82,6 +85,7 @@ def get_output_table_header():
         'show_at_worst',
         'show_best_response',
         'rate_limit',
+        'mean_matching',
     ]
 
 def get_output_table(events):
@@ -102,6 +106,8 @@ def get_output_table(events):
         p2_decision = float('nan')
         p1_target = float('nan')
         p2_target = float('nan')
+        row_avg = float('nan')
+        col_avg = float('nan')
         for tick in range((maxT - minT).seconds * ticks_per_second):
             currT = minT + timedelta(seconds=(tick / ticks_per_second))
             cur_decision_event = None
@@ -114,6 +120,9 @@ def get_output_table(events):
                         p1_target = e.value
                     else:
                         p2_target = e.value
+                elif e.channel == 'averages':
+                    row_avg = e.value[p1_code]
+                    col_avg = e.value[p2_code]
             if cur_decision_event:
                 p1_decision = cur_decision_event.value[p1_code]
                 p2_decision = cur_decision_event.value[p2_code]
@@ -127,6 +136,8 @@ def get_output_table(events):
                 p2_decision,
                 p1_target,
                 p2_target,
+                row_avg,
+                col_avg,
                 p1_code,
                 p2_code,
             ] + config_columns)
@@ -134,12 +145,17 @@ def get_output_table(events):
         tick = 0
         p1_target = float('nan')
         p2_target = float('nan')
+        p1_avg = float('nan')
+        p2_avg = float('nan')
         for event in events:
             if event.channel == 'target':
                 if event.participant.code == p1_code:
                     p1_target = event.value
                 else:
                     p2_target = event.value
+            elif event.channel == 'averages':
+                p1_avg = event.value[p1_code]
+                p2_avg = event.value[p2_code]
             elif event.channel == 'group_decisions':
                 rows.append([
                     group.session.code,
@@ -151,6 +167,8 @@ def get_output_table(events):
                     event.value[p2_code],
                     p1_target,
                     p2_target,
+                    p1_avg,
+                    p2_avg,
                     p1_code,
                     p2_code,
                 ] + config_columns)
