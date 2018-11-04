@@ -29,7 +29,7 @@ def parse_config(config_file):
     rounds = []
     for row in rows:
         rounds.append({
-            'shuffle_role': True if row['shuffle_role'] == 'TRUE' else False,
+            'shuffle_role': True if row['shuffle_role'] == 'FALSE' else False,
             'period_length': int(row['period_length']),
             'num_subperiods': int(row['num_subperiods']),
             'pure_strategy': True if row['pure_strategy'] == 'TRUE' else False,
