@@ -29,7 +29,7 @@ def parse_config(config_file):
     rounds = []
     for row in rows:
         rounds.append({
-            'shuffle_role': True if row['shuffle_role'] == 'FALSE' else False,
+            'shuffle_role': True if row['shuffle_role'] == 'TRUE' else False,
             'period_length': int(row['period_length']),
             'num_subperiods': int(row['num_subperiods']),
             'pure_strategy': True if row['pure_strategy'] == 'TRUE' else False,
@@ -70,10 +70,12 @@ class Subsession(BaseSubsession, SubsessionSilosMixin):
         if self.round_number > len(config):
             return
 
-        fixed_id_in_group = config[self.round_number-1]['shuffle_role']
+        fixed_id_in_group = not config[self.round_number-1]['shuffle_role']
         groups_per_silo = self.session.config['groups_per_silo']
         # use otree-redwood's SubsessionSilosMixin to organize the session into silos
         self.group_randomly_in_silos(groups_per_silo, fixed_id_in_group)
+        for p in self.get_players():
+            print(p.participant.code, p.id_in_group)
 
     def payoff_matrix(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['payoff_matrix']
