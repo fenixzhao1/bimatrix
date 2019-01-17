@@ -15,6 +15,7 @@ This is a configurable bimatrix game.
 
 class Constants(BaseConstants):
     name_in_url = 'bimatrix'
+    # players per group when not using mean matching
     players_per_group = 2
 	# Maximum number of rounds, actual number is taken as the max round
 	# in the config file.
@@ -48,16 +49,16 @@ def parse_config(config_file):
 class Subsession(BaseSubsession, SubsessionSilosMixin):
 
     def get_average_strategy(self, row_player):
-        id_in_group = 1 if row_player else 2
-        players = [p for p in self.get_players() if p.id_in_group == id_in_group] 
+        role = 'row' if row_player else 'column'
+        players = [p for p in self.get_players() if p.role() == role] 
         sum_strategies = 0
         for p in players:
             sum_strategies += p.get_average_strategy()
         return sum_strategies / len(players)
     
     def get_average_payoff(self, row_player):
-        id_in_group = 1 if row_player else 2
-        players = [p for p in self.get_players() if p.id_in_group == id_in_group] 
+        role = 'row' if row_player else 'column'
+        players = [p for p in self.get_players() if p.role() == role] 
         sum_payoffs = 0
         for p in players:
             if not p.payoff:
@@ -69,9 +70,19 @@ class Subsession(BaseSubsession, SubsessionSilosMixin):
         config = parse_config(self.session.config['config_file'])
         if self.round_number > len(config):
             return
+        
+        groups_per_silo = self.session.config['groups_per_silo']
+
+        # if mean matching is enabled, put everyone in the same silo in the same group
+        if config[self.round_number-1]['mean_matching']:
+            players_per_silo = groups_per_silo * Constants.players_per_group
+            group_matrix = []
+            players = self.get_players()
+            for i in range(0, len(players), players_per_silo):
+                group_matrix.append(players[i:i+players_per_silo])
+            self.set_group_matrix(group_matrix)
 
         fixed_id_in_group = not config[self.round_number-1]['shuffle_role']
-        groups_per_silo = self.session.config['groups_per_silo']
         # use otree-redwood's SubsessionSilosMixin to organize the session into silos
         self.group_randomly_in_silos(groups_per_silo, fixed_id_in_group)
 
@@ -108,6 +119,12 @@ class Group(DecisionGroup, GroupSilosMixin):
 
 class Player(BasePlayer):
 
+    def role(self):
+        if self.id_in_group % 2 == 0:
+            return 'column'
+        else:
+            return 'row'
+
     def get_average_strategy(self):
         decisions = list(Event.objects.filter(
                 channel='group_decisions',
@@ -141,7 +158,7 @@ class Player(BasePlayer):
 
     def set_payoff(self):
         decisions = list(Event.objects.filter(
-                channel='decisions',
+                channel='group_decisions',
                 content_type=ContentType.objects.get_for_model(self.group),
                 group_pk=self.group.pk).order_by("timestamp"))
 
@@ -168,34 +185,42 @@ class Player(BasePlayer):
         period_duration = period_end.timestamp - period_start.timestamp
 
         payoff = 0
+        role_index = 0 if self.role() == 'row' else 1
 
-        Aa = payoff_matrix[0][self.id_in_group-1]
-        Ab = payoff_matrix[1][self.id_in_group-1]
-        Ba = payoff_matrix[2][self.id_in_group-1]
-        Bb = payoff_matrix[3][self.id_in_group-1]
-
-        if self.id_in_group == 1:
-            row_player = self.participant
-            q1, q2 = self.initial_decision(), self.other_player().initial_decision()
-        else:
-            row_player = self.other_player().participant
-            q2, q1 = self.initial_decision(), self.other_player().initial_decision()
+        Aa = payoff_matrix[0][role_index]
+        Ab = payoff_matrix[1][role_index]
+        Ba = payoff_matrix[2][role_index]
+        Bb = payoff_matrix[3][role_index]
 
         q1, q2 = 0.5, 0.5
         for i, d in enumerate(decisions):
-            if d.participant == row_player:
-                q1 = d.value
+            if not d.value: continue
+
+            other_role_decisions = [d.value[p.participant.code] for p in self.group.get_players() if p.role() != self.role()]
+            if self.role() == 'row':
+                q1 = d.value[self.participant.code]
+                q2 = sum(other_role_decisions) / len(other_role_decisions)
             else:
-                q2 = d.value
+                q2 = d.value[self.participant.code]
+                q1 = sum(other_role_decisions) / len(other_role_decisions)
+
             flow_payoff = ((Aa * q1 * q2) +
                            (Ab * q1 * (1 - q2)) +
                            (Ba * (1 - q1) * q2) +
                            (Bb * (1 - q1) * (1 - q2)))
 
-            if i + 1 < len(decisions):
-                next_change_time = decisions[i + 1].timestamp
+            if self.group.num_subperiods():
+                if i == 0:
+                    prev_change_time = period_start.timestamp
+                else:
+                    prev_change_time = decisions[i - 1].timestamp
+                decision_length = (d.timestamp - prev_change_time).total_seconds()
             else:
-                next_change_time = period_end.timestamp
-            payoff += (next_change_time - d.timestamp).total_seconds() * flow_payoff
-
+                if i + 1 < len(decisions):
+                    next_change_time = decisions[i + 1].timestamp
+                else:
+                    next_change_time = period_end.timestamp
+                decision_length = (next_change_time - d.timestamp).total_seconds()
+            payoff += decision_length * flow_payoff
         return payoff / period_duration.total_seconds()
+    

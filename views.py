@@ -32,7 +32,7 @@ class Results(Page):
     def vars_for_template(self):
         if not self.player.payoff:
             self.player.set_payoff()
-        row_player = self.player.id_in_group == 1
+        row_player = self.player.role() == 'row'
         return {
             'player_average_strategy': self.subsession.get_average_strategy(row_player),
             'player_average_payoff': self.subsession.get_average_payoff(row_player),
@@ -56,21 +56,31 @@ def get_config_columns(group):
         config['mean_matching'],
     ]
 
-def get_output_table_header():
-    return [
+def get_output_table_header(groups):
+    groups_per_silo = groups[0].session.config['groups_per_silo']
+    max_num_players = groups_per_silo * 2
+    header = [
         'session_code',
         'subsession_id',
         'id_in_subsession',
         'silo_num',
         'tick',
-        'p1_strategy',
-        'p2_strategy',
-        'p1_target',
-        'p2_target',
-        'p1_avg',
-        'p2_avg',
-        'p1_code',
-        'p2_code',
+    ]
+
+    for player_num in range(1, max_num_players + 1):
+        header.append('p{}_code'.format(player_num))
+        header.append('p{}_role'.format(player_num))
+        header.append('p{}_strategy'.format(player_num))
+        header.append('p{}_target'.format(player_num))
+        # 'p1_strategy',
+        # 'p2_strategy',
+        # 'p1_target',
+        # 'p2_target',
+        # 'p1_avg',
+        # 'p2_avg',
+        # 'p1_code',
+        # 'p2_code',
+    header += [
         'payoff1Aa',
         'payoff2Aa',
         'payoff1Ab',
@@ -87,6 +97,7 @@ def get_output_table_header():
         'rate_limit',
         'mean_matching',
     ]
+    return header
 
 def get_output_table(events):
     if not events:
@@ -94,20 +105,22 @@ def get_output_table(events):
     rows = []
     minT = min(e.timestamp for e in events if e.channel == 'state')
     maxT = max(e.timestamp for e in events if e.channel == 'state')
-    p1, p2 = events[0].group.get_players()
-    p1_code = p1.participant.code
-    p2_code = p2.participant.code
+    players = events[0].group.get_players()
+    # p1_code = p1.participant.code
+    # p2_code = p2.participant.code
     group = events[0].group
+    groups_per_silo = group.session.config['groups_per_silo']
+    max_num_players = groups_per_silo * 2
     config_columns = get_config_columns(group)
     # sets sampling frequency for continuous time output
     ticks_per_second = 2
     if group.num_subperiods() == 0:
-        p1_decision = float('nan')
-        p2_decision = float('nan')
-        p1_target = float('nan')
-        p2_target = float('nan')
-        row_avg = float('nan')
-        col_avg = float('nan')
+        decisions = {p.participant.code: float('nan') for p in players}
+        # p1_decision = float('nan')
+        # p2_decision = float('nan')
+        targets = {p.participant.code: float('nan') for p in players}
+        # p1_target = float('nan')
+        # p2_target = float('nan')
         for tick in range((maxT - minT).seconds * ticks_per_second):
             currT = minT + timedelta(seconds=(tick / ticks_per_second))
             cur_decision_event = None
@@ -116,62 +129,86 @@ def get_output_table(events):
                 if e.channel == 'group_decisions':
                     cur_decision_event = e
                 elif e.channel == 'target':
-                    if e.participant.code == p1_code:
-                        p1_target = e.value
-                    else:
-                        p2_target = e.value
-                elif e.channel == 'averages':
-                    row_avg = e.value[p1_code]
-                    col_avg = e.value[p2_code]
+                    targets[e.participant.code] = e.value
             if cur_decision_event:
-                p1_decision = cur_decision_event.value[p1_code]
-                p2_decision = cur_decision_event.value[p2_code]
-            rows.append([
+                decisions.update(cur_decision_event.value)
+            row = [
                 group.session.code,
                 group.subsession_id,
                 group.id_in_subsession,
                 group.silo_num,
                 tick,
-                p1_decision,
-                p2_decision,
-                p1_target,
-                p2_target,
-                row_avg,
-                col_avg,
-                p1_code,
-                p2_code,
-            ] + config_columns)
+            ]
+            for player_num in range(max_num_players):
+                if player_num >= len(players):
+                    row += ['', '', '']
+                else:
+                    pcode = players[player_num].participant.code
+                    row += [
+                        pcode,
+                        players[player_num].role(),
+                        decisions[pcode],
+                        targets[pcode],
+                    ]
+            row += config_columns
+            rows.append(row)
+            # rows.append([
+            #     group.session.code,
+            #     group.subsession_id,
+            #     group.id_in_subsession,
+            #     group.silo_num,
+            #     tick,
+            #     p1_decision,
+            #     p2_decision,
+            #     p1_target,
+            #     p2_target,
+            #     row_avg,
+            #     col_avg,
+            #     p1_code,
+            #     p2_code,
+            # ] + config_columns)
     else:
         tick = 0
-        p1_target = float('nan')
-        p2_target = float('nan')
-        p1_avg = float('nan')
-        p2_avg = float('nan')
+        targets = {p.participant.code: float('nan') for p in players}
         for event in events:
             if event.channel == 'target':
-                if event.participant.code == p1_code:
-                    p1_target = event.value
-                else:
-                    p2_target = event.value
-            elif event.channel == 'averages':
-                p1_avg = event.value[p1_code]
-                p2_avg = event.value[p2_code]
+                targets[event.participant.code] = event.value
             elif event.channel == 'group_decisions':
-                rows.append([
+                row = [
                     group.session.code,
                     group.subsession_id,
                     group.id_in_subsession,
                     group.silo_num,
                     tick,
-                    event.value[p1_code],
-                    event.value[p2_code],
-                    p1_target,
-                    p2_target,
-                    p1_avg,
-                    p2_avg,
-                    p1_code,
-                    p2_code,
-                ] + config_columns)
+                ]
+                for player_num in range(max_num_players):
+                    if player_num >= len(players):
+                        row += ['', '', '']
+                    else:
+                        pcode = players[player_num].participant.code
+                        row += [
+                            pcode,
+                            players[player_num].role(),
+                            event.value[pcode],
+                            targets[pcode],
+                        ]
+                row += config_columns
+                rows.append(row)
+                # rows.append([
+                #     group.session.code,
+                #     group.subsession_id,
+                #     group.id_in_subsession,
+                #     group.silo_num,
+                #     tick,
+                #     event.value[p1_code],
+                #     event.value[p2_code],
+                #     p1_target,
+                #     p2_target,
+                #     p1_avg,
+                #     p2_avg,
+                #     p1_code,
+                #     p2_code,
+                # ] + config_columns)
                 tick += 1
     return rows
 

@@ -122,7 +122,7 @@
             initial-decision="[[ initialDecision ]]"
             my-decision="{{ myPlannedDecision }}"
             my-current-decision="{{ myDecision }}"
-            other-decision="{{ otherDecision }}"
+            group-decisions="{{ groupDecisions }}"
             max-per-second="10"
             on-group-decisions-changed="_onGroupDecisionsChanged"
             mean-matching="[[ meanMatching ]]">
@@ -307,11 +307,16 @@
                 myPlannedDecision: {
                     type: Number,
                 },
+                groupDecisions: {
+                    type: Object,
+                },
                 myDecision: {
                     type: Number,
                 },
+                // can't use otherDecision from redwood-decision because of mean matching special case
                 otherDecision: {
                     type: Number,
+                    computed: '_computeOtherDecision(groupDecisions)',
                 },
                 periodLength: Number,
                 numSubperiods: {
@@ -372,7 +377,7 @@
                 _myPlannedDecisionString: {
                     type: String,
                     observer: '_syncMyPlannedDecision',
-                }
+                },
             },
             ready() {
                 // set payoff indices
@@ -380,12 +385,12 @@
                     console.log('Not in game, manually setting payoffIndex');
                     this.payoffIndex = 0;
                 } else {
-                    this.payoffIndex = this.$.constants.idInGroup - 1;
+                    this.payoffIndex = this.$.constants.role == 'row' ? 0 : 1;
                 }
                 this.otherPayoffIndex = 1 - this.payoffIndex;
 
                 // transpose payoff and probability matrices if player controls vertical line
-                if (this.$.constants.idInGroup == 2) {
+                if (this.$.constants.role == 'column') {
                     // first payoff matrix
                     let temp = this.payoffMatrix[1];
                     this.payoffMatrix[1] = this.payoffMatrix[2];
@@ -452,6 +457,28 @@
                 this._subperiodProgress = 100 * ((deltaT / 1000) / secondsPerSubperiod);
                 this._animID = window.requestAnimationFrame(
                     this._updateSubperiodProgress.bind(this));
+            },
+            _computeOtherDecision(groupDecisions) {
+                // if mean matching, calculate other decision as mean decision of others with opposite role
+                if (this.meanMatching) {
+                    sum_avg_strategy = 0;
+                    num_other_players = 0;
+                    for (player of this.$.constants.group.players) {
+                        if (player.role != this.$.constants.role) {
+                            sum_avg_strategy += groupDecisions[player.participantCode];
+                            num_other_players++;
+                        }
+                    }
+                    return sum_avg_strategy / num_other_players;
+                }
+                // if not mean matching, just choose other decision normally
+                else {
+                    for (pcode in groupDecisions) {
+                        if (pcode != this.$.constants.participantCode) {
+                            return groupDecisions[pcode]
+                        }
+                    }
+                }
             },
         })
     </script>
