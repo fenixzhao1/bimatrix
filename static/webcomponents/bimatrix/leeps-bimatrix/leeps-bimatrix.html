@@ -244,7 +244,7 @@
 
                     <div id="graphs-column" class="layout horizontal">
                         <div class="layout horizontal end">
-                            <template is="dom-if" if="[[ !pureStrategy ]]">
+                            <template is="dom-if" if="[[ _showThermometer(pureStrategy, meanMatching) ]]">
                                 <heatmap-thermometer
                                     color="rainbow"
                                     class="self-end">
@@ -446,6 +446,7 @@
             },
             _onPeriodEnd() {
                 window.cancelAnimationFrame(this._animID);
+                this._subperiodProgress = 0;
             },
             _onGroupDecisionsChanged() {
                 this.lastT = performance.now();
@@ -459,26 +460,21 @@
                     this._updateSubperiodProgress.bind(this));
             },
             _computeOtherDecision(groupDecisions) {
-                // if mean matching, calculate other decision as mean decision of others with opposite role
-                if (this.meanMatching) {
-                    sum_avg_strategy = 0;
-                    num_other_players = 0;
-                    for (player of this.$.constants.group.players) {
-                        if (player.role != this.$.constants.role) {
-                            sum_avg_strategy += groupDecisions[player.participantCode];
-                            num_other_players++;
-                        }
-                    }
-                    return sum_avg_strategy / num_other_players;
-                }
-                // if not mean matching, just choose other decision normally
-                else {
-                    for (pcode in groupDecisions) {
-                        if (pcode != this.$.constants.participantCode) {
-                            return groupDecisions[pcode]
-                        }
+                // calculate other decision as mean decision of others with opposite role
+                // this works for pairwise matching and for mean matching
+                sum_avg_strategy = 0;
+                num_other_players = 0;
+                for (player of this.$.constants.group.players) {
+                    if (player.role != this.$.constants.role) {
+                        sum_avg_strategy += groupDecisions[player.participantCode];
+                        num_other_players++;
                     }
                 }
+                return sum_avg_strategy / num_other_players;
+            },
+            // return true if thermometer is to be shown
+            _showThermometer(pureStrategy, meanMatching) {
+                return !pureStrategy || meanMatching;
             },
         })
     </script>
