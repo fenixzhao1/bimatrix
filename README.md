@@ -13,6 +13,6 @@ bimatrix was built using [otree-redwood](https://github.com/Leeps-Lab/otree-redw
     'num_demo_participants': 2,
     'app_sequence': ['bimatrix', 'payment_info'],
     'config_file': 'demo.csv',
-    'groups_per_silo': 2,
+    'num_silos': 1,
 }
 ```

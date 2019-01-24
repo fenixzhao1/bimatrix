@@ -1,5 +1,6 @@
 import csv
 import random
+import math
 
 from django.contrib.contenttypes.models import ContentType
 from otree.constants import BaseConstants
@@ -71,20 +72,20 @@ class Subsession(BaseSubsession, SubsessionSilosMixin):
         if self.round_number > len(config):
             return
         
-        groups_per_silo = self.session.config['groups_per_silo']
+        num_silos = self.session.config['num_silos']
 
         # if mean matching is enabled, put everyone in the same silo in the same group
         if config[self.round_number-1]['mean_matching']:
-            players_per_silo = groups_per_silo * Constants.players_per_group
-            group_matrix = []
             players = self.get_players()
+            players_per_silo = math.ceil(len(players) / num_silos)
+            group_matrix = []
             for i in range(0, len(players), players_per_silo):
                 group_matrix.append(players[i:i+players_per_silo])
             self.set_group_matrix(group_matrix)
 
         fixed_id_in_group = not config[self.round_number-1]['shuffle_role']
         # use otree-redwood's SubsessionSilosMixin to organize the session into silos
-        self.group_randomly_in_silos(groups_per_silo, fixed_id_in_group)
+        self.group_randomly_in_silos(num_silos, fixed_id_in_group)
 
     def payoff_matrix(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['payoff_matrix']
@@ -98,7 +99,7 @@ class Subsession(BaseSubsession, SubsessionSilosMixin):
     def show_best_response(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['show_best_response']
     
-    def rate_limit(self):
+    def slider_rate_limit(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['rate_limit']
 
 
@@ -115,6 +116,12 @@ class Group(DecisionGroup, GroupSilosMixin):
     
     def mean_matching(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['mean_matching']
+    
+    def rate_limit(self):
+        if not self.subsession.pure_strategy() and self.mean_matching():
+            return 0.2
+        else:
+            return None
 
 
 class Player(BasePlayer):
@@ -147,7 +154,6 @@ class Player(BasePlayer):
             weighted_sum_decision += decision_value * (next_change_time - cur_decision.timestamp).total_seconds()
         return weighted_sum_decision / self.group.period_length()
 
-
     def initial_decision(self):
         if self.subsession.pure_strategy():
             return random.choice([0, 1])
@@ -179,7 +185,6 @@ class Player(BasePlayer):
         payoff_matrix = self.subsession.payoff_matrix()
 
         self.payoff = self.get_payoff(period_start, period_end, decisions, payoff_matrix)
-        
 
     def get_payoff(self, period_start, period_end, decisions, payoff_matrix):
         period_duration = period_end.timestamp - period_start.timestamp

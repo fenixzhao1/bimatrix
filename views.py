@@ -1,3 +1,4 @@
+import math
 from ._builtin import Page, WaitPage
 
 from datetime import timedelta
@@ -40,6 +41,7 @@ class Results(Page):
     def is_displayed(self):
         return self.round_number <= self.group.num_rounds()
 
+
 def get_config_columns(group):
     config = parse_config(group.session.config['config_file'])[group.round_number - 1]
     payoffs = config['payoff_matrix']
@@ -55,9 +57,11 @@ def get_config_columns(group):
         config['mean_matching'],
     ]
 
+
 def get_output_table_header(groups):
-    groups_per_silo = groups[0].session.config['groups_per_silo']
-    max_num_players = groups_per_silo * 2
+    num_silos = groups[0].session.config['num_silos']
+    max_num_players = max(len(g.get_players()) for g in groups)
+
     header = [
         'session_code',
         'subsession_id',
@@ -71,14 +75,7 @@ def get_output_table_header(groups):
         header.append('p{}_role'.format(player_num))
         header.append('p{}_strategy'.format(player_num))
         header.append('p{}_target'.format(player_num))
-        # 'p1_strategy',
-        # 'p2_strategy',
-        # 'p1_target',
-        # 'p2_target',
-        # 'p1_avg',
-        # 'p2_avg',
-        # 'p1_code',
-        # 'p2_code',
+
     header += [
         'payoff1Aa',
         'payoff2Aa',
@@ -98,39 +95,76 @@ def get_output_table_header(groups):
     ]
     return header
 
+
 def get_output_table(events):
     if not events:
         return []
+    if events[0].group.num_subperiods() == 0:
+        return get_output_cont_time(events)
+    else:
+        return get_output_discrete_time(events)
+
+
+# build output for a round of continuous time bimatrix
+def get_output_cont_time(events):
     rows = []
     minT = min(e.timestamp for e in events if e.channel == 'state')
     maxT = max(e.timestamp for e in events if e.channel == 'state')
-    players = events[0].group.get_players()
-    # p1_code = p1.participant.code
-    # p2_code = p2.participant.code
     group = events[0].group
-    groups_per_silo = group.session.config['groups_per_silo']
-    max_num_players = groups_per_silo * 2
+    players = group.get_players()
+    max_num_players = math.ceil(group.session.num_participants / group.session.config['num_silos'])
     config_columns = get_config_columns(group)
-    # sets sampling frequency for continuous time output
+    # sets sampling frequency
     ticks_per_second = 2
-    if group.num_subperiods() == 0:
-        decisions = {p.participant.code: float('nan') for p in players}
-        # p1_decision = float('nan')
-        # p2_decision = float('nan')
-        targets = {p.participant.code: float('nan') for p in players}
-        # p1_target = float('nan')
-        # p2_target = float('nan')
-        for tick in range((maxT - minT).seconds * ticks_per_second):
-            currT = minT + timedelta(seconds=(tick / ticks_per_second))
-            cur_decision_event = None
-            while events[0].timestamp <= currT:
-                e = events.pop(0)
-                if e.channel == 'group_decisions':
-                    cur_decision_event = e
-                elif e.channel == 'target':
-                    targets[e.participant.code] = e.value
-            if cur_decision_event:
-                decisions.update(cur_decision_event.value)
+    decisions = {p.participant.code: float('nan') for p in players}
+    targets = {p.participant.code: float('nan') for p in players}
+    for tick in range((maxT - minT).seconds * ticks_per_second):
+        currT = minT + timedelta(seconds=(tick / ticks_per_second))
+        cur_decision_event = None
+        while events[0].timestamp <= currT:
+            e = events.pop(0)
+            if e.channel == 'group_decisions':
+                cur_decision_event = e
+            elif e.channel == 'target':
+                targets[e.participant.code] = e.value
+        if cur_decision_event:
+            decisions.update(cur_decision_event.value)
+        row = [
+            group.session.code,
+            group.subsession_id,
+            group.id_in_subsession,
+            group.silo_num,
+            tick,
+        ]
+        for player_num in range(max_num_players):
+            if player_num >= len(players):
+                row += ['', '', '', '']
+            else:
+                pcode = players[player_num].participant.code
+                row += [
+                    pcode,
+                    players[player_num].role(),
+                    decisions[pcode],
+                    targets[pcode],
+                ]
+        row += config_columns
+        rows.append(row)
+    return rows
+
+
+# build output for a round of discrete time bimatrix
+def get_output_discrete_time(events):
+    rows = []
+    players = events[0].group.get_players()
+    group = events[0].group
+    max_num_players = math.ceil(group.session.num_participants / group.session.config['num_silos'])
+    config_columns = get_config_columns(group)
+    tick = 0
+    targets = {p.participant.code: float('nan') for p in players}
+    for event in events:
+        if event.channel == 'target':
+            targets[event.participant.code] = event.value
+        elif event.channel == 'group_decisions':
             row = [
                 group.session.code,
                 group.subsession_id,
@@ -140,76 +174,20 @@ def get_output_table(events):
             ]
             for player_num in range(max_num_players):
                 if player_num >= len(players):
-                    row += ['', '', '']
+                    row += ['', '', '', '']
                 else:
                     pcode = players[player_num].participant.code
                     row += [
                         pcode,
                         players[player_num].role(),
-                        decisions[pcode],
+                        event.value[pcode],
                         targets[pcode],
                     ]
             row += config_columns
             rows.append(row)
-            # rows.append([
-            #     group.session.code,
-            #     group.subsession_id,
-            #     group.id_in_subsession,
-            #     group.silo_num,
-            #     tick,
-            #     p1_decision,
-            #     p2_decision,
-            #     p1_target,
-            #     p2_target,
-            #     row_avg,
-            #     col_avg,
-            #     p1_code,
-            #     p2_code,
-            # ] + config_columns)
-    else:
-        tick = 0
-        targets = {p.participant.code: float('nan') for p in players}
-        for event in events:
-            if event.channel == 'target':
-                targets[event.participant.code] = event.value
-            elif event.channel == 'group_decisions':
-                row = [
-                    group.session.code,
-                    group.subsession_id,
-                    group.id_in_subsession,
-                    group.silo_num,
-                    tick,
-                ]
-                for player_num in range(max_num_players):
-                    if player_num >= len(players):
-                        row += ['', '', '']
-                    else:
-                        pcode = players[player_num].participant.code
-                        row += [
-                            pcode,
-                            players[player_num].role(),
-                            event.value[pcode],
-                            targets[pcode],
-                        ]
-                row += config_columns
-                rows.append(row)
-                # rows.append([
-                #     group.session.code,
-                #     group.subsession_id,
-                #     group.id_in_subsession,
-                #     group.silo_num,
-                #     tick,
-                #     event.value[p1_code],
-                #     event.value[p2_code],
-                #     p1_target,
-                #     p2_target,
-                #     p1_avg,
-                #     p2_avg,
-                #     p1_code,
-                #     p2_code,
-                # ] + config_columns)
-                tick += 1
+            tick += 1
     return rows
+    
 
 page_sequence = [
     Introduction,
