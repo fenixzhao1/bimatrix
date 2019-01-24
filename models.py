@@ -5,6 +5,7 @@ import math
 from django.contrib.contenttypes.models import ContentType
 from otree.constants import BaseConstants
 from otree.models import BasePlayer, BaseSubsession
+from django.db.models import FloatField
 
 from otree_redwood.models import Event, DecisionGroup
 from otree_redwood.mixins import SubsessionSilosMixin, GroupSilosMixin
@@ -126,6 +127,10 @@ class Group(DecisionGroup, GroupSilosMixin):
 
 class Player(BasePlayer):
 
+    # store generated initial decision so that if player.initial_decision is called
+    # more than once, it always returns the same value
+    _initial_decision = FloatField(null=True)
+
     def role(self):
         if self.id_in_group % 2 == 0:
             return 'column'
@@ -155,9 +160,15 @@ class Player(BasePlayer):
         return weighted_sum_decision / self.group.period_length()
 
     def initial_decision(self):
+        self.refresh_from_db()
+        if self._initial_decision:
+            return self._initial_decision
         if self.subsession.pure_strategy():
-            return random.choice([0, 1])
-        return random.random()
+            self._initial_decision = random.choice([0, 1])
+        else:
+            self._initial_decision = random.random()
+        self.save(update_fields=['_initial_decision'])
+        return self._initial_decision
 
     def other_player(self):
         return self.get_others_in_group()[0]
