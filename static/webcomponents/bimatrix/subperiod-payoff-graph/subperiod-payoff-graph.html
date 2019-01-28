@@ -1,9 +1,7 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html"/>
 
-<link
-    rel="import"
-    href="/static/otree-redwood/webcomponents/redwood-channel/redwood-channel.html" />
-
+<link rel="import" href="/static/otree-redwood/webcomponents/redwood-channel/redwood-channel.html" />
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 
 <dom-module id="subperiod-payoff-graph">
 	<template>
@@ -15,6 +13,7 @@
 
 		</style>
 
+        <otree-constants id="constants"></otree-constants>
     	<redwood-channel
     		channel="group_decisions"
     		on-event="_handleGroupDecisionsEvent">
@@ -158,15 +157,19 @@
 				return arr[arr.length - 1];
 			},
 			_handleGroupDecisionsEvent(event) {
-				let myDecision;
-				let otherDecision;
-				for (let key in event.detail.payload) {
-					if (key == oTree.participantCode) {
-						myDecision = event.detail.payload[key];
-					} else {
-						otherDecision = event.detail.payload[key];
+				const groupDecisions = event.detail.payload;
+				const myDecision = groupDecisions[this.$.constants.participantCode];
+				const otherDecision = (() => {
+					sum_avg_strategy = 0;
+					num_other_players = 0;
+					for (player of this.$.constants.group.players) {
+						if (player.role != this.$.constants.role) {
+							sum_avg_strategy += groupDecisions[player.participantCode];
+							num_other_players++;
+						}
 					}
-                }
+					return sum_avg_strategy / num_other_players;
+				})();
 
 				this._currSubperiod += 1;
 
