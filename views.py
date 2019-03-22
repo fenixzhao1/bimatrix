@@ -28,6 +28,8 @@ class Decision(Page):
     
 
 class Results(Page):
+    
+    timeout_seconds = 10
 
     def vars_for_template(self):
         if not self.player.payoff:
