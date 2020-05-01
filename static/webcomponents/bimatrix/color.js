@@ -39,7 +39,7 @@ var color_stops = {
 // gets colors from the gradient defined by the color stops above
 // 0.0 <= percent <= 1.0
 // where percent = 1.0 gets the last color in color_stops and percent = 0.0 gets the first color in color_stops
-function get_gradient_color(percent, color_scheme) {
+export function get_gradient_color(percent, color_scheme) {
     const scheme = color_stops[color_scheme];
     if (typeof(scheme[0][0]) == 'number') {
         percent *= (scheme.length - 1);

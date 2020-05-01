@@ -25,10 +25,10 @@ class Decision(Page):
 
     def is_displayed(self):
         return self.round_number <= self.group.num_rounds()
-    
+
 
 class Results(Page):
-    
+
     timeout_seconds = 10
 
     def vars_for_template(self):
@@ -189,10 +189,9 @@ def get_output_discrete_time(events):
             rows.append(row)
             tick += 1
     return rows
-    
+
 
 page_sequence = [
-    Introduction,
     DecisionWaitPage,
     Decision,
     Results

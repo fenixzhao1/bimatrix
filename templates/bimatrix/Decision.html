@@ -8,9 +8,11 @@
 {% block scripts %}
     <script src="//code.highcharts.com/highcharts.js"></script>
 
-    <link
+    <script type="module" src="{% static 'webcomponents/bimatrix/leeps-bimatrix/leeps-bimatrix.js' %}"></script>
+
+    <!-- <link
         rel="import"
-        href="{% static "webcomponents/bimatrix/leeps-bimatrix/leeps-bimatrix.html" %}">
+        href="{% static "webcomponents/bimatrix/leeps-bimatrix/leeps-bimatrix.html" %}"> -->
 {% endblock %}
 
 {% block content %}
