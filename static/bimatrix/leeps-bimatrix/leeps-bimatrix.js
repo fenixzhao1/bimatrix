@@ -22,9 +22,6 @@ import '../color.js';
 
 
 export class LeepsBimatrix extends PolymerElement {
-    constructor() {
-        super();
-    }
 
     static get template() {
         return html `

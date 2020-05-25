@@ -2,9 +2,6 @@ import {html,PolymerElement} from '/static/otree-redwood/node_modules/@polymer/p
 import '/static/otree-redwood/src/redwood-period/redwood-period.js';
 
 export class StrategyGraph extends PolymerElement {
-    constructor() {
-        super();
-    }
 
     static get template() {
         return html `

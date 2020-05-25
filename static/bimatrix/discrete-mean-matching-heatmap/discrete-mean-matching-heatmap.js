@@ -2,9 +2,6 @@ import {html,PolymerElement} from '/static/otree-redwood/node_modules/@polymer/p
 import {get_gradient_color} from '../color.js';
 
 export class DiscreteMeanMatchingHeatmap extends PolymerElement {
-    constructor() {
-        super();
-    }
 
     static get template() {
         return html `

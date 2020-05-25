@@ -3,9 +3,6 @@ import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 import './range-styles.js';
 
 export class StyledRange extends PolymerElement {
-    constructor() {
-        super();
-    }
 
     static get template() {
         return html `

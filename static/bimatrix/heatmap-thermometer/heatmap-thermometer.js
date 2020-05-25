@@ -3,9 +3,6 @@ import {get_gradient_color} from '../color.js';
 // other imports go here
 
 export class HeatmapThermometer extends PolymerElement {
-    constructor() {
-        super();
-    }
 
     static get template() {
         return html `

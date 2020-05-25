@@ -3,9 +3,6 @@ import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 import '/static/otree-redwood/src/otree-constants/otree-constants.js';
 
 export class SubperiodPayoffGraph extends PolymerElement {
-    constructor() {
-        super();
-    }
 
     static get template() {
         return html `

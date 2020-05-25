@@ -2,9 +2,6 @@ import {html,PolymerElement} from '/static/otree-redwood/node_modules/@polymer/p
 import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 
 export class SubperiodStrategyGraph extends PolymerElement {
-    constructor() {
-        super();
-    }
 
     static get template() {
         return html `
