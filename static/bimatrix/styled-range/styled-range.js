@@ -1,5 +1,6 @@
 import {html,PolymerElement} from '/static/otree-redwood/node_modules/@polymer/polymer/polymer-element.js';
 import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
+import './range-styles.js';
 
 export class StyledRange extends PolymerElement {
     constructor() {
@@ -8,9 +9,7 @@ export class StyledRange extends PolymerElement {
 
     static get template() {
         return html `
-            <link rel="stylesheet" href="range.css">
-
-            <style>
+            <style include="range-styles">
                 :host {
                     display: flex;
                     flex-direction: row;

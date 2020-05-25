@@ -6,9 +6,9 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="//code.highcharts.com/highcharts.js"></script>
+    <script src="{% static 'bimatrix/highcharts.js' %}"></script>
 
-    <script type="module" src="{% static 'webcomponents/bimatrix/leeps-bimatrix/leeps-bimatrix.js' %}"></script>
+    <script type="module" src="{% static 'bimatrix/leeps-bimatrix/leeps-bimatrix.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -32,7 +32,6 @@
         {% if player.subsession.show_best_response %}
         show-best-response
         {% endif %}
-        >
-    </leeps-bimatrix>
+    ></leeps-bimatrix>
 
 {% endblock %}
