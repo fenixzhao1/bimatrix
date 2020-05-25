@@ -2,12 +2,12 @@ import {html,PolymerElement} from '/static/otree-redwood/node_modules/@polymer/p
 import '../color.js';
 
 export class DiscreteMeanMatchingHeatmap extends PolymerElement {
-	constructor() {
-		super();
-	}
+    constructor() {
+        super();
+    }
 
-	static get template() {
-		return html `
+    static get template() {
+        return html `
             <style>
                 :host {
                     font-size: 9pt;
@@ -80,11 +80,11 @@ export class DiscreteMeanMatchingHeatmap extends PolymerElement {
 
                 <div id="other-val" style$="width: [[ _calcPercent(otherDecision) ]]"></div>
             </div>
-		`
-	}
+        `
+    }
 
-	static get properties() {
-		return {
+    static get properties() {
+        return {
             myDecision: {
                 type: Number,
             },
@@ -102,8 +102,8 @@ export class DiscreteMeanMatchingHeatmap extends PolymerElement {
                 type: String,
                 observer: '_makeAllHeatmaps',
             },
-		}
-	}
+        }
+    }
 
     _makeAllHeatmaps() {
         const payoffs = this.get('payoffs');

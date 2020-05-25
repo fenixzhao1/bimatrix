@@ -2,12 +2,12 @@ import {html,PolymerElement} from '/static/otree-redwood/node_modules/@polymer/p
 import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 
 export class SubperiodStrategyGraph extends PolymerElement {
-	constructor() {
-		super();
-	}
+    constructor() {
+        super();
+    }
 
-	static get template() {
-		return html `
+    static get template() {
+        return html `
             <style>
 
                 :host {
@@ -22,11 +22,11 @@ export class SubperiodStrategyGraph extends PolymerElement {
             </redwood-channel>
 
             <div id="chart"></div>
-		`
-	}
+        `
+    }
 
-	static get properties() {
-		return {
+    static get properties() {
+        return {
             myDecision: {
                 type: Number,
             },
@@ -38,8 +38,8 @@ export class SubperiodStrategyGraph extends PolymerElement {
                 type: Number,
                 value: 0,
             },
-		}
-	}
+        }
+    }
 
     ready() {
         this.setTimeout(this._initHighchart.bind(this), 1);

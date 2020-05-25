@@ -2,12 +2,12 @@ import {html,PolymerElement} from '/static/otree-redwood/node_modules/@polymer/p
 import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 
 export class StyledRange extends PolymerElement {
-	constructor() {
-		super();
-	}
+    constructor() {
+        super();
+    }
 
-	static get template() {
-		return html `
+    static get template() {
+        return html `
             <link rel="stylesheet" href="range.css">
 
             <style>
@@ -30,11 +30,11 @@ export class StyledRange extends PolymerElement {
                 disabled$="[[ disabled ]]"
                 on-change="_inputValueChanged"
                 value="[[ initialValue ]]">
-		`
-	}
+        `
+    }
 
-	static get properties() {
-		return {
+    static get properties() {
+        return {
             disabled: {
                 type: Boolean,
                 observer: '_disabledChanged'
@@ -70,8 +70,8 @@ export class StyledRange extends PolymerElement {
             _timeoutID: {
                 type: Number,
             },
-		}
-	}
+        }
+    }
 
     _inputValueChanged(event) {
         this._sliderValue = parseFloat(event.target.value);
