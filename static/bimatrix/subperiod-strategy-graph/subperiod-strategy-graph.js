@@ -41,8 +41,9 @@ export class SubperiodStrategyGraph extends PolymerElement {
         }
     }
 
-    ready() {
-        this.setTimeout(this._initHighchart.bind(this), 1);
+    connectedCallback() {
+        super.connectedCallback();
+        this._initHighchart();
     }
     // helper method to return last element of array
     _lastElem(arr) {

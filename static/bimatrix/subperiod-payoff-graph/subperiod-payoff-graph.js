@@ -57,9 +57,9 @@ export class SubperiodPayoffGraph extends PolymerElement {
         }
     }
 
-    ready() {
-        super.ready()
-        this.setTimeout(this._initHighchart.bind(this), 1);
+    connectedCallback() {
+        super.connectedCallback();
+        this._initHighchart();
     }
     // sets up payoff over time graph
     _initHighchart() {
@@ -165,9 +165,9 @@ export class SubperiodPayoffGraph extends PolymerElement {
         const groupDecisions = event.detail.payload;
         const myDecision = groupDecisions[this.$.constants.participantCode];
         const otherDecision = (() => {
-            sum_avg_strategy = 0;
-            num_other_players = 0;
-            for (player of this.$.constants.group.players) {
+            let sum_avg_strategy = 0;
+            let num_other_players = 0;
+            for (const player of this.$.constants.group.players) {
                 if (player.role != this.$.constants.role) {
                     sum_avg_strategy += groupDecisions[player.participantCode];
                     num_other_players++;
