@@ -1,14 +1,14 @@
+from otree.api import (
+    models, BaseConstants, BaseSubsession, BasePlayer
+)
+
+from django.contrib.contenttypes.models import ContentType
+from otree_redwood.models import Event, DecisionGroup
+
 import csv
 import random
 import math
-
-from django.contrib.contenttypes.models import ContentType
-from otree.constants import BaseConstants
-from otree.models import BasePlayer, BaseSubsession
-from django.db.models import FloatField
-
-from otree_redwood.models import Event, DecisionGroup
-from otree_redwood.mixins import SubsessionSilosMixin, GroupSilosMixin
+import otree.common
 
 doc = """
 This is a configurable bimatrix game.
@@ -48,7 +48,7 @@ def parse_config(config_file):
     return rounds
 
 
-class Subsession(BaseSubsession, SubsessionSilosMixin):
+class Subsession(BaseSubsession):
 
     def get_average_strategy(self, row_player):
         role = 'row' if row_player else 'column'
@@ -68,25 +68,37 @@ class Subsession(BaseSubsession, SubsessionSilosMixin):
             sum_payoffs += p.payoff
         return sum_payoffs / len(players)
 
-    def before_session_starts(self):
+    def creating_session(self):
         config = parse_config(self.session.config['config_file'])
         if self.round_number > len(config):
             return
         
         num_silos = self.session.config['num_silos']
-
-        # if mean matching is enabled, put everyone in the same silo in the same group
-        if config[self.round_number-1]['mean_matching']:
-            players = self.get_players()
-            players_per_silo = math.ceil(len(players) / num_silos)
-            group_matrix = []
-            for i in range(0, len(players), players_per_silo):
-                group_matrix.append(players[i:i+players_per_silo])
-            self.set_group_matrix(group_matrix)
-
         fixed_id_in_group = not config[self.round_number-1]['shuffle_role']
-        # use otree-redwood's SubsessionSilosMixin to organize the session into silos
-        self.group_randomly_in_silos(num_silos, fixed_id_in_group)
+
+        players = self.get_players()
+        num_players = len(players)
+        silos = [[] for _ in range(num_silos)]
+        for i, player in enumerate(players):
+            if self.round_number == 1:
+                player.silo_num = math.floor(num_silos * i/num_players)
+            else:
+                player.silo_num = player.in_round(1).silo_num
+            silos[player.silo_num].append(player)
+
+        group_matrix = []
+        for silo in silos:
+            if config[self.round_number-1]['mean_matching']:
+                silo_matrix = [ silo ]
+            else:
+                silo_matrix = []
+                ppg = Constants.players_per_group
+                for i in range(0, len(silo), ppg):
+                    silo_matrix.append(silo[i:i+ppg])
+            group_matrix.extend(otree.common._group_randomly(silo_matrix, fixed_id_in_group))
+        
+        self.set_group_matrix(group_matrix)
+
 
     def payoff_matrix(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['payoff_matrix']
@@ -104,7 +116,7 @@ class Subsession(BaseSubsession, SubsessionSilosMixin):
         return parse_config(self.session.config['config_file'])[self.round_number-1]['rate_limit']
 
 
-class Group(DecisionGroup, GroupSilosMixin):
+class Group(DecisionGroup):
 
     def num_rounds(self):
         return len(parse_config(self.session.config['config_file']))
@@ -127,9 +139,11 @@ class Group(DecisionGroup, GroupSilosMixin):
 
 class Player(BasePlayer):
 
+    silo_num = models.IntegerField()
+
     # store generated initial decision so that if player.initial_decision is called
     # more than once, it always returns the same value
-    _initial_decision = FloatField(null=True)
+    _initial_decision = models.FloatField()
 
     def role(self):
         if self.id_in_group % 2 == 0:
