@@ -1,48 +1,7 @@
-import math
-from ._builtin import Page, WaitPage
-
 from datetime import timedelta
 from operator import concat
 from functools import reduce
 from .models import parse_config
-
-class Introduction(Page):
-
-    def is_displayed(self):
-        return self.round_number == 1
-
-
-class DecisionWaitPage(WaitPage):
-    body_text = 'Waiting for all players to be ready'
-
-    wait_for_all_groups = True
-
-    def is_displayed(self):
-        return self.round_number <= self.group.num_rounds()
-
-
-class Decision(Page):
-
-    def is_displayed(self):
-        return self.round_number <= self.group.num_rounds()
-
-
-class Results(Page):
-
-    timeout_seconds = 10
-
-    def vars_for_template(self):
-        if not self.player.payoff:
-            self.player.set_payoff()
-        row_player = self.player.role() == 'row'
-        return {
-            'player_average_strategy': self.subsession.get_average_strategy(row_player),
-            'player_average_payoff': self.subsession.get_average_payoff(row_player),
-        }
-
-    def is_displayed(self):
-        return self.round_number <= self.group.num_rounds()
-
 
 def get_config_columns(group):
     config = parse_config(group.session.config['config_file'])[group.round_number - 1]
@@ -58,7 +17,6 @@ def get_config_columns(group):
         config['rate_limit'],
         config['mean_matching'],
     ]
-
 
 def get_output_table_header(groups):
     num_silos = groups[0].session.config['num_silos']
@@ -189,10 +147,3 @@ def get_output_discrete_time(events):
             rows.append(row)
             tick += 1
     return rows
-
-
-page_sequence = [
-    DecisionWaitPage,
-    Decision,
-    Results
-]

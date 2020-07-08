@@ -12,26 +12,28 @@
 {% endblock %}
 
 {% block content %}
-    <leeps-bimatrix
-        initial-decision='{{ player.initial_decision }}'
-        payoff-matrix='{{ player.subsession.payoff_matrix }}'
-        period-length='{{ player.group.period_length }}'
-        rate-limit='{{ player.subsession.slider_rate_limit }}'
-        {% if player.group.mean_matching %}
-        mean-matching
-        {% endif %}
-        {% if player.group.num_subperiods %}
-        num-subperiods='{{ player.group.num_subperiods }}'
-        {% endif %}
-        {% if player.subsession.pure_strategy %}
-        pure-strategy
-        {% endif %}
-        {% if player.subsession.show_at_worst %}
-        show-at-worst
-        {% endif %}
-        {% if player.subsession.show_best_response %}
-        show-best-response
-        {% endif %}
-    ></leeps-bimatrix>
+    {% with config=subsession.config %}
+        <leeps-bimatrix
+            initial-decision='{{ player.initial_decision }}'
+            payoff-matrix='{{ config.payoff_matrix }}'
+            period-length='{{ config.period_length }}'
+            rate-limit='{{ config.rate_limit }}'
+            {% if config.mean_matching %}
+            mean-matching
+            {% endif %}
+            {% if config.num_subperiods %}
+            num-subperiods='{{ config.num_subperiods }}'
+            {% endif %}
+            {% if config.pure_strategy %}
+            pure-strategy
+            {% endif %}
+            {% if config.show_at_worst %}
+            show-at-worst
+            {% endif %}
+            {% if config.show_best_response %}
+            show-best-response
+            {% endif %}
+        ></leeps-bimatrix>
+    {% endwith %}
 
 {% endblock %}
