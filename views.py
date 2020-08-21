@@ -1,3 +1,4 @@
+import math
 from datetime import timedelta
 from operator import concat
 from functools import reduce
@@ -129,7 +130,7 @@ def get_output_discrete_time(events):
                 group.session.code,
                 group.subsession_id,
                 group.id_in_subsession,
-                group.silo_num,
+                players[0].silo_num,
                 tick,
             ]
             for player_num in range(max_num_players):
