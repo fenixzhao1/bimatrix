@@ -94,7 +94,7 @@ def get_output_cont_time(events):
             group.session.code,
             group.subsession_id,
             group.id_in_subsession,
-            group.silo_num,
+            players[0].silo_num,
             tick,
         ]
         for player_num in range(max_num_players):
