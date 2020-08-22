@@ -6,6 +6,7 @@ from operator import concat
 from functools import reduce
 from .models import parse_config
 
+
 class Introduction(Page):
 
     def is_displayed(self):
@@ -71,6 +72,7 @@ class Results(Page):
 
 
 page_sequence = [
+    Introduction,
     DecisionWaitPage,
     Decision,
     ResultsWaitPage,
