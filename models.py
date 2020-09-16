@@ -23,6 +23,7 @@ class Constants(BaseConstants):
 	# in the config file.
     num_rounds = 100
     base_points = 0
+    
 
 
 def parse_config(config_file):
@@ -54,6 +55,9 @@ class Subsession(BaseSubsession):
         config = self.config
         if not config:
             return
+
+        #Random round picked for payment
+        self.session.vars['payment_round'] = random.randint(1, self.num_rounds())
         
         num_silos = self.session.config['num_silos']
         fixed_id_in_group = not config['shuffle_role']
@@ -78,7 +82,7 @@ class Subsession(BaseSubsession):
                 for i in range(0, len(silo), ppg):
                     silo_matrix.append(silo[i:i+ppg])
             group_matrix.extend(otree.common._group_randomly(silo_matrix, fixed_id_in_group))
-        
+
         self.set_group_matrix(group_matrix)
     
     def set_initial_decisions(self):
@@ -88,6 +92,9 @@ class Subsession(BaseSubsession):
                 player._initial_decision = random.choice([0, 1])
             else:
                 player._initial_decision = random.random()
+
+    def num_rounds(self):
+        return len(parse_config(self.session.config['config_file']) )
 
     @property
     def config(self):
@@ -138,6 +145,7 @@ class Player(BasePlayer):
         else:
             return 'row'
 
+
     def get_average_strategy(self, period_start, period_end, decisions):
         weighted_sum_decision = 0
         while decisions:
@@ -146,6 +154,20 @@ class Player(BasePlayer):
             decision_value = cur_decision.value[self.participant.code]
             weighted_sum_decision += decision_value * (next_change_time - cur_decision.timestamp).total_seconds()
         return weighted_sum_decision / self.group.period_length()
+
+    #get frequency of player picking choice
+    def get_frequency(self, choice, decisions):
+        count = 0
+        total = 0
+        decisions = self.group.get_group_decisions_events()
+        while decisions:
+            cur_decision = decisions.pop(0)
+            decision_value = cur_decision.value[self.participant.code]
+            total += 1
+            if (decision_value == choice):
+                count += 1
+        return count / total
+        
 
     def set_payoff(self, period_start, period_end, decisions, payoff_matrix):
         period_duration = period_end - period_start
@@ -189,5 +211,4 @@ class Player(BasePlayer):
                 decision_length = (next_change_time - d.timestamp).total_seconds()
             payoff += decision_length * flow_payoff
 
-        self.payoff = payoff / period_duration.total_seconds()
-    
+        self.payoff = payoff / period_duration.total_seconds()    
