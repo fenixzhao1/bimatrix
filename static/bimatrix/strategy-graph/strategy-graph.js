@@ -120,11 +120,13 @@ export class StrategyGraph extends PolymerElement {
             },
             series: [{
                 name: 'Your Choice',
+                type: "area",
                 data: this.myChoiceSeries,
                 step: "left"
             },
             {
                 name: 'Other Choice',
+                type: "line",
                 data: this.otherChoiceSeries,
                 step: "left"
             }],
