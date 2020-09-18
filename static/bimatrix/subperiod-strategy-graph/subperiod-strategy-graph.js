@@ -94,6 +94,7 @@ export class SubperiodStrategyGraph extends PolymerElement {
             },
             plotOptions: {
                 line: {marker: {enabled: false}},
+                area: {marker: {enabled: false}},
                 series: {
                     states: {
                         hover: {
@@ -113,7 +114,7 @@ export class SubperiodStrategyGraph extends PolymerElement {
             },
             series: [{
                 name: 'Your Choice',
-                type: "line",
+                type: "area",
                 data: [[0, 0]],
                 step: "left"
             },

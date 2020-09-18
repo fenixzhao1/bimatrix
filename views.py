@@ -24,20 +24,6 @@ def get_output_table_header(groups):
     max_num_players = max(len(g.get_players()) for g in groups)
 
     header = [
-        'session_code',
-        'subsession_id',
-        'id_in_subsession',
-        'silo_num',
-        'tick',
-    ]
-
-    for player_num in range(1, max_num_players + 1):
-        header.append('p{}_code'.format(player_num))
-        header.append('p{}_role'.format(player_num))
-        header.append('p{}_strategy'.format(player_num))
-        header.append('p{}_target'.format(player_num))
-
-    header += [
         'payoff1Aa',
         'payoff2Aa',
         'payoff1Ab',
@@ -54,6 +40,21 @@ def get_output_table_header(groups):
         'rate_limit',
         'mean_matching',
     ]
+
+    header += [
+        'session_code',
+        'subsession_id',
+        'id_in_subsession',
+        'silo_num',
+        'tick',
+    ]
+
+    for player_num in range(1, max_num_players + 1):
+        header.append('p{}_code'.format(player_num))
+        header.append('p{}_role'.format(player_num))
+        header.append('p{}_strategy'.format(player_num))
+        header.append('p{}_target'.format(player_num))
+
     return header
 
 
@@ -90,7 +91,9 @@ def get_output_cont_time(events):
                 targets[e.participant.code] = e.value
         if cur_decision_event:
             decisions.update(cur_decision_event.value)
-        row = [
+        row = []
+        row += config_columns
+        row += [
             group.session.code,
             group.subsession_id,
             group.id_in_subsession,
@@ -108,7 +111,6 @@ def get_output_cont_time(events):
                     decisions[pcode],
                     targets[pcode],
                 ]
-        row += config_columns
         rows.append(row)
     return rows
 
@@ -126,6 +128,8 @@ def get_output_discrete_time(events):
         if event.channel == 'target':
             targets[event.participant.code] = event.value
         elif event.channel == 'group_decisions':
+            row = []
+            row += config_columns
             row = [
                 group.session.code,
                 group.subsession_id,
@@ -144,7 +148,6 @@ def get_output_discrete_time(events):
                         event.value[pcode],
                         targets[pcode],
                     ]
-            row += config_columns
             rows.append(row)
             tick += 1
     return rows
