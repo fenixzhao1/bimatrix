@@ -88,7 +88,6 @@ class Payment(Page):
     def vars_for_template(self):
 
         return {
-            'payment': self.player.in_round(self.session.vars['payment_round']).payoff.to_real_world_currency(self.session),
             'payoff': self.player.in_round(self.session.vars['payment_round']).payoff,
             'payoff_round': self.session.vars['payment_round'],
         }
