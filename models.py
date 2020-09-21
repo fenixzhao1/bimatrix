@@ -135,6 +135,7 @@ class Player(BasePlayer):
 
     silo_num = models.IntegerField()
     _initial_decision = models.FloatField()
+    final_payoff = models.CurrencyField()
 
     def initial_decision(self):
         return self._initial_decision
@@ -212,3 +213,5 @@ class Player(BasePlayer):
             payoff += decision_length * flow_payoff
 
         self.payoff = payoff / period_duration.total_seconds()    
+        if self.round_number == self.subsession.num_rounds():
+            self.final_payoff = self.in_round(self.session.vars['payment_round']).payoff
