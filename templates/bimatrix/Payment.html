@@ -1,0 +1,20 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block title %}
+    Final Page
+{% endblock %}
+
+{% block content %}
+
+<p>
+Congratulations! You have completed the experiment.
+</p>
+<p>
+    The round which determines your payment was randomly decided as round {{ payoff_round }}. Your payment is {{payoff}}.
+    Please press next to end the experiment.
+</p>
+
+    {% next_button %}
+
+{% endblock %}

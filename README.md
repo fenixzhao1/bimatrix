@@ -7,12 +7,12 @@ bimatrix was built using [otree-redwood](https://github.com/Leeps-Lab/otree-redw
 ### Suggested session config:
 
 ```
-{
-    'name': 'bimatrix',
-    'display_name': "Generic Bimatrix Game",
-    'num_demo_participants': 2,
-    'app_sequence': ['bimatrix', 'payment_info'],
-    'config_file': 'demo.csv',
-    'groups_per_silo': 2,
-}
+dict(
+    name='bimatrix',
+    display_name='Generic Bimatrix Game',
+    num_demo_participants=2,
+    app_sequence=['bimatrix'],
+    config_file='demo.csv',
+    num_silos=1,
+),
 ```

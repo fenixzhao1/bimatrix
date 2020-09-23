@@ -1,15 +1,16 @@
 {% extends "global/Page.html" %}
-{% load staticfiles otree_tags %}
+{% load otree static %}
 
 {% block title %}
-    Introduction
+    Welcome to LEEPS Online Laboratory!
 {% endblock %}
 
 {% block content %}
 
-	{% with template_name=subsession.app_name|add:"/Instructions.html" %}
-		{% include template_name %}
-	{% endwith %}
+<p>
+Thank you for participating in this interactive decision-making experiment.
+    To start the experiment, please press next. The experiment starts when everyone is ready.
+</p>
 
     {% next_button %}
 
